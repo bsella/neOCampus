@@ -1,12 +1,11 @@
 package capteur;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.text.DateFormat;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Scanner;
 
 public class CapteurExterieur {
 	private int ID;
@@ -21,7 +20,7 @@ public class CapteurExterieur {
 	
 	private Socket sToServer= new Socket("127.0.0.1",7888);
 
-	public CapteurExterieur(int ID, GPSCoord gps, TypeCapExter t)  throws UnknownHostException, IOException{
+	public CapteurExterieur(int ID, GPSCoord gps, TypeCapExter t)  throws Exception{
 		this.ID=ID;
 		this.emplacement=gps;
 		this.type=t;
@@ -68,8 +67,15 @@ public class CapteurExterieur {
 		Date date= new Date();
 		this.date=dateFormat.format(date);
 	}
-	public void envoyerConnectionCapteur() throws IOException{
+	public void envoyerConnectionCapteur() throws Exception{
 		PrintStream p=new PrintStream(sToServer.getOutputStream());
 		p.println("ConnexionCapteur;"+ID+";"+type+";"+emplacement.getLatitude()+";"+emplacement.getLongitude());
+		@SuppressWarnings("resource")
+		Scanner sc=new Scanner(sToServer.getInputStream());
+		String conf =sc.nextLine();
+		if(conf.equals("ConnexionOK"))
+			System.out.println("Connexion du capteur "+ ID + " reussie");
+		else
+			System.out.println("Connexion du capteur "+ ID + " echouee");
 	}
 }

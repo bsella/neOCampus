@@ -10,15 +10,17 @@ import java.util.Date;
 import java.util.Scanner;
 
 public class CapteurInterieur {
-	private static int ID;
-	private static Emplacement emplacement;
-	private static TypeCapInter type;
+	private int ID;
+	private Emplacement emplacement;
+	private TypeCapInter type;
 	private String uniteDeMesure;
 	private int intervalleMin, intervalleMax;
 	private double precision;
 	private double margeDeConfiance;
 	private int frequence;
 	private String date;
+	
+	private Socket sToServer=new Socket("127.0.0.1",7888);
 	
 	public CapteurInterieur(int i ,Emplacement e, TypeCapInter t) throws UnknownHostException, IOException{
 		ID=i;
@@ -82,9 +84,11 @@ public class CapteurInterieur {
 		this.date=dateFormat.format(date);
 	}
 	
-	public void envoyerConnexionCapteur(PrintStream p, Socket s) throws IOException{
+	public void envoyerConnexionCapteur() throws IOException{
+		PrintStream p= new PrintStream(sToServer.getOutputStream());
 		p.println("ConnexionCapteur;"+ID+";"+type+";"+emplacement.getBatiment()+";"+emplacement.getEtage()+";"+emplacement.getSalle()+";"+emplacement.getDescriptif());
-		Scanner sc=new Scanner(s.getInputStream());
+		@SuppressWarnings("resource")
+		Scanner sc=new Scanner(sToServer.getInputStream());
 		String conf =sc.nextLine();
 		if(conf.equals("ConnexionOK"))
 			System.out.println("Connexion du capteur "+ ID + " reussie");
@@ -93,13 +97,5 @@ public class CapteurInterieur {
 	}
 	public void deconnecterCapteur(){
 		
-	}
-	public static void main(String args[]) throws UnknownHostException, IOException{
-		TypeCapInter t = TypeCapInter.EAU_FROIDE;
-		Socket sToServer=new Socket("127.0.0.1",7888);
-		PrintStream p=new PrintStream(sToServer.getOutputStream());
-		p=new PrintStream(sToServer.getOutputStream());
-		CapteurInterieur test =new CapteurInterieur(123, new Emplacement(new Batiment("B3", 1.3, 4.3), 2, "s", "d"), t);
-		test.envoyerConnexionCapteur(p,sToServer);
 	}
 }
