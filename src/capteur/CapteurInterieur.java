@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.Scanner;
 
 public class CapteurInterieur {
-	private int ID;
+	private String ID;
 	private Emplacement emplacement;
 	private TypeCapInter type;
 	private String uniteDeMesure;
@@ -22,8 +22,8 @@ public class CapteurInterieur {
 	
 	private Socket sToServer=new Socket("127.0.0.1",7888);
 	
-	public CapteurInterieur(int i ,Emplacement e, TypeCapInter t) throws UnknownHostException, IOException{
-		ID=i;
+	public CapteurInterieur(String id ,Emplacement e, TypeCapInter t, int frequence) throws UnknownHostException, IOException{
+		ID=id;
 		emplacement=e;
 		type=t;
 		switch(t){
@@ -32,53 +32,54 @@ public class CapteurInterieur {
 			this.intervalleMin=-10; this.intervalleMax=50;
 			this.precision=.1;
 			this.margeDeConfiance=.2;
-			this.frequence=60;
+			//this.frequence=60;
 			break;
 		case CONSOMMATION_ECLAIRAGE:
 			this.uniteDeMesure="Watt(W)";
 			 this.intervalleMin=0; this.intervalleMax=3000;
 			this.precision=1;
 			this.margeDeConfiance=2;
-			this.frequence=30;
+			//this.frequence=30;
 			break;
 		case EAU_CHAUDE:
 			this.uniteDeMesure="Litre(l)";
 			this.intervalleMin=0; this.intervalleMax=1000;
 			this.precision=.1;
 			this.margeDeConfiance=0;
-			this.frequence=60;
+			//this.frequence=60;
 			break;
 		case EAU_FROIDE:
 			this.uniteDeMesure="Litre(l)";
 			this.intervalleMin=0; this.intervalleMax=1000;
 			this.precision=.1;
 			this.margeDeConfiance=0;
-			this.frequence=600;
+			//this.frequence=600;
 			break;
 		case HUMIDITE:
 			this.uniteDeMesure="%";
 			this.intervalleMin=0; this.intervalleMax=100;
 			this.precision=1;
 			this.margeDeConfiance=0;
-			this.frequence=90;
+			//this.frequence=90;
 			break;
 		case LUMINOSITE:
 			this.uniteDeMesure="Lumen(lum)";
 			this.intervalleMin=0; this.intervalleMax=1000;
 			this.precision=.01;
 			this.margeDeConfiance=.01;
-			this.frequence=5;
+			//this.frequence=5;
 			break;
 		case VOLUME_SONORE:
 			this.uniteDeMesure="Decibel(dB)";
 			this.intervalleMin=0; this.intervalleMax=120;
 			this.precision=.1;
 			this.margeDeConfiance=.1;
-			this.frequence=10;
+			//this.frequence=10;
 			break;
 		default:
 			break;
 		}
+		this.frequence=frequence;
 		DateFormat dateFormat= new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		Date date= new Date();
 		this.date=dateFormat.format(date);
