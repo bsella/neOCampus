@@ -204,20 +204,38 @@ public class Fenetre extends JFrame {
 		});
 		pb.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e){
-				if (pb.getValue()==0){
+				if (pb.getValue()==pb.getMaximum()){
 					if(rdbtnExterieur.isSelected()){
 						try{
 							CapteurExterieur ce= new CapteurExterieur(textID.getText(), null, getTypeExter((String)mesureBox.getSelectedItem()), textIp.getText(), Integer.parseInt(textPort.getText()));
 							ce.envoyerValeurCapteur(ce.simule());
-						}catch (Exception e1) {
-							e1.printStackTrace();
+						}catch (Exception e1){
+							JOptionPane.showMessageDialog(new JFrame(), "Erreur : serveur non connecte");
+							connectB.setEnabled(true);
+							deconnectB.setEnabled(false);
+							textIp.setEnabled(true);
+							textPort.setEnabled(true);
+							tp.addTab("Capteur", capteur);
+							connected=false;
+							pb.setValue(0);
+							pb.setVisible(false);
+							t.stop();
 						}
 					}else{
 						try{
 							CapteurInterieur ci= new CapteurInterieur(textID.getText(), null, getTypeInter((String)mesureBox.getSelectedItem()), textIp.getText(), Integer.parseInt(textPort.getText()));
 							ci.envoyerValeurCapteur(ci.simule());
 						}catch (Exception e1){
-							e1.printStackTrace();
+							JOptionPane.showMessageDialog(new JFrame(), "Erreur : serveur non connecte");
+							connectB.setEnabled(true);
+							deconnectB.setEnabled(false);
+							textIp.setEnabled(true);
+							textPort.setEnabled(true);
+							tp.addTab("Capteur", capteur);
+							connected=false;
+							pb.setValue(0);
+							pb.setVisible(false);
+							t.stop();
 						}
 					}
 				}	
@@ -308,7 +326,7 @@ public class Fenetre extends JFrame {
 					}
 					if(toutVaBien) try{
 						CapteurExterieur ce= new CapteurExterieur(textID.getText(), gps, t,textIp.getText(),port);
-						ce.envoyerConnectionCapteur();	
+						toutVaBien=ce.envoyerConnectionCapteur();	
 						pb.setMaximum(ce.getFrequence()*25);
 						frequence=ce.getFrequence();
 					}
@@ -343,7 +361,7 @@ public class Fenetre extends JFrame {
 						Batiment bat=new Batiment((String)batiBox.getSelectedItem(), 0, 0);
 						try{
 							CapteurInterieur ci=new CapteurInterieur(textID.getText(),new Emplacement(bat, etage, (String)salleBox.getSelectedItem(), (String)posBox.getSelectedItem()),t,textIp.getText(),port);
-							ci.envoyerConnexionCapteur();
+							toutVaBien=ci.envoyerConnexionCapteur();
 							pb.setMaximum(ci.getFrequence()*25);
 							frequence=ci.getFrequence();
 						}catch(Exception ex){
@@ -378,6 +396,7 @@ public class Fenetre extends JFrame {
 							textPort.setEnabled(true);
 							tp.addTab("Capteur", capteur);
 							connected=false;
+							pb.setValue(0);
 							pb.setVisible(false);
 							t.stop();
 						}else
@@ -395,6 +414,7 @@ public class Fenetre extends JFrame {
 							textPort.setEnabled(true);
 							tp.addTab("Capteur", capteur);
 							connected=false;
+							pb.setValue(0);
 							pb.setVisible(false);
 							t.stop();
 						}else

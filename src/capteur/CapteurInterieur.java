@@ -84,16 +84,20 @@ public class CapteurInterieur {
 		this.date=dateFormat.format(date);
 	}
 	
-	public void envoyerConnexionCapteur() throws Exception{
+	public boolean envoyerConnexionCapteur() throws Exception{
 		PrintStream p= new PrintStream(sToServer.getOutputStream());
 		p.println("ConnexionCapteur;"+ID+";"+type+";"+emplacement.getBatiment()+";"+emplacement.getEtage()+";"+emplacement.getSalle()+";"+emplacement.getDescriptif());
 		@SuppressWarnings("resource")
 		Scanner sc=new Scanner(sToServer.getInputStream());
 		String conf =sc.nextLine();
-		if(conf.equals("ConnexionOK"))
+		if(conf.equals("ConnexionOK")){
 			System.out.println("Connexion du capteur "+ ID + " reussie");
-		else
+			return true;
+		}
+		else{
 			System.out.println("Connexion du capteur "+ ID + " echouee");
+			return false;
+		}
 	}
 	
 	public boolean deconnecterCapteur() throws Exception{

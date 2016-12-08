@@ -70,16 +70,20 @@ public class CapteurExterieur {
 		Date date= new Date();
 		this.date=dateFormat.format(date);
 	}
-	public void envoyerConnectionCapteur() throws Exception{
+	public boolean envoyerConnectionCapteur() throws Exception{
 		PrintStream p=new PrintStream(sToServer.getOutputStream());
 		p.println("ConnexionCapteur;"+ID+";"+type+";"+emplacement.getLatitude()+";"+emplacement.getLongitude());
 		@SuppressWarnings("resource")
 		Scanner sc=new Scanner(sToServer.getInputStream());
 		String conf =sc.nextLine();
-		if(conf.equals("ConnexionOK"))
+		if(conf.equals("ConnexionOK")){
 			System.out.println("Connexion du capteur "+ ID + " reussie");
-		else
+			return true;
+		}
+		else{
 			System.out.println("Connexion du capteur "+ ID + " echouee");
+			return false;
+		}
 	}
 	public boolean deconnecterCapteur() throws Exception{
 		PrintStream p= new PrintStream(sToServer.getOutputStream());
