@@ -32,6 +32,37 @@ public class Fenetre extends JFrame {
 		});
 	}
 	
+	private boolean validIP (String ip) {
+	    try {
+	        if ( ip == null || ip.isEmpty() ) {
+	            return false;
+	        }
+
+	        String[] parts = ip.split( "\\." );
+	        if ( parts.length != 4 ) {
+	            return false;
+	        }
+
+	        for ( String s : parts ) {
+	            int i = Integer.parseInt( s );
+	            if ( (i < 0) || (i > 255) ) {
+	                return false;
+	            }
+	        }
+	        if ( ip.endsWith(".") ) {
+	            return false;
+	        }
+
+	        return true;
+	    } catch (NumberFormatException nfe) {
+	        return false;
+	    }
+	}
+	
+	public String[] bats;
+	public String[] etages;
+	public String[] salles;
+	
 	private TypeCapExter getTypeExter(String t){
 		switch(t){
 			case "Pression":
@@ -100,7 +131,7 @@ public class Fenetre extends JFrame {
 		JComboBox<String> batiBox = new JComboBox<>();
 		JComboBox<String> etageBox = new JComboBox<>();
 		JComboBox<String> salleBox = new JComboBox<>();
-		JComboBox<String> posBox = new JComboBox<>();
+		JTextField textPos = new JTextField();
 		JComboBox<String> mesureBox = new JComboBox<>();
 		JButton valideButton = new JButton("Valide");
 		JLabel lblIp = new JLabel("Addresse du serveur :");
@@ -116,9 +147,9 @@ public class Fenetre extends JFrame {
 		textID.setBounds(90, 7, 200, 26);
 		lblType.setBounds(10, 38, 122, 28);
 		lblLatitude.setBounds(10, 118, 61, 16);
-		textLat.setBounds(115, 138, 130, 26);
+		textLon.setBounds(115, 138, 130, 26);
 		lblLongitude.setBounds(10, 143, 73, 16);
-		textLon.setBounds(115, 113, 130, 26);
+		textLat.setBounds(115, 113, 130, 26);
 		batiBox.setBounds(80, 112, 130, 27);
 		etageBox.setBounds(80, 142, 130, 27);
 		lblBatiment.setBounds(10, 115, 70, 16);
@@ -126,7 +157,7 @@ public class Fenetre extends JFrame {
 		lblSalle.setBounds(10, 175, 61, 16);
 		lblPosition.setBounds(10, 205, 61, 16);
 		salleBox.setBounds(80, 172, 130, 27);
-		posBox.setBounds(80, 202, 130, 27);
+		textPos.setBounds(80, 202, 130, 27);
 		rdbtnExterieur.setBounds(105, 78, 88, 23);
 		mesureBox.setBounds(118, 40, 130, 27);
 		rdbtnInterieur.setBounds(10, 77, 88, 26);
@@ -150,7 +181,7 @@ public class Fenetre extends JFrame {
 		lblSalle.setVisible(false);
 		lblPosition.setVisible(false);
 		salleBox.setVisible(false);
-		posBox.setVisible(false);
+		textPos.setVisible(false);
 		rdbtnExterieur.setSelected(true);
 		rdbtnExterieur.setEnabled(true);
 		rdbtnInterieur.setEnabled(true);
@@ -161,7 +192,7 @@ public class Fenetre extends JFrame {
 		capteur.add(lblSalle);
 		capteur.add(lblPosition);
 		capteur.add(salleBox);
-		capteur.add(posBox);
+		capteur.add(textPos);
 		capteur.add(rdbtnExterieur);
 		capteur.add(rdbtnInterieur);
 		capteur.add(lblIdentifiant);
@@ -183,11 +214,6 @@ public class Fenetre extends JFrame {
 		connexion.add(connectB);
 		connexion.add(deconnectB);
 		connexion.add(pb);
-		textIp.setText("127.0.0.1");
-		textPort.setText("7888");
-		textID.setText("ssbsv");
-		textLon.setText("345");
-		textLat.setText("345");
 		
 		mesureBox.addItem("Température");
 		mesureBox.addItem("Humidité");
@@ -241,6 +267,7 @@ public class Fenetre extends JFrame {
 				}	
 			}
 		});
+		
 		rdbtnExterieur.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				mesureBox.addItem("Pression");
@@ -258,7 +285,7 @@ public class Fenetre extends JFrame {
 				batiBox.setVisible(false);
 				etageBox.setVisible(false);
 				salleBox.setVisible(false);
-				posBox.setVisible(false);
+				textPos.setVisible(false);
 				lblBatiment.setVisible(false);
 				lblEtage.setVisible(false);
 				lblSalle.setVisible(false);
@@ -284,7 +311,7 @@ public class Fenetre extends JFrame {
 				batiBox.setVisible(true);
 				etageBox.setVisible(true);
 				salleBox.setVisible(true);
-				posBox.setVisible(true);
+				textPos.setVisible(true);
 				lblBatiment.setVisible(true);
 				lblEtage.setVisible(true);
 				lblSalle.setVisible(true);
@@ -294,31 +321,70 @@ public class Fenetre extends JFrame {
 		
 		capteur.add(mesureBox);
 		
+		GestionFichierPositionExterieur g= new GestionFichierPositionExterieur("/Users/karim/Documents/workspace/neOCampus/src/capteur/format_bat");
+		bats=g.listeBatiment();
+		etages = g.listeEtageFromBatiment(bats[0]);
+		salles=g.listeSalleFromEtageAndBatiment(bats[0],etages[0]);
+		for(String s : bats) batiBox.addItem(s);
+		for(String s : etages) etageBox.addItem(s);
+		for(String s : salles) salleBox.addItem(s);
+		batiBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange()==ItemEvent.SELECTED){
+					Object item = e.getItem();
+					String bat= (String)item;
+					etageBox.removeAllItems();
+					for(String s : g.listeEtageFromBatiment(bat)) etageBox.addItem(s);
+					salleBox.removeAllItems();
+					for(String s : g.listeSalleFromEtageAndBatiment((String)batiBox.getSelectedItem(),(String)etageBox.getSelectedItem())) salleBox.addItem(s);
+				}
+			}
+		});
+		
+		etageBox.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange()==ItemEvent.SELECTED){
+					Object item = e.getItem();
+					String etage= (String)item;
+					salleBox.removeAllItems();
+					for(String s : g.listeSalleFromEtageAndBatiment((String)batiBox.getSelectedItem(),etage)) salleBox.addItem(s);
+				}
+			}
+		});
+		
 		connectB.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e){
 				boolean toutVaBien=true;
 				int port=0;
-				if(rdbtnExterieur.isSelected()){
-					TypeCapExter t=getTypeExter((String)mesureBox.getSelectedItem());
-					GPSCoord gps=null;
-					if(textID.getText()==null || textID.getText().isEmpty()){
-						toutVaBien=false;
-						JOptionPane.showMessageDialog(new JFrame(), "Saisir un identifiant pour le capteur");
-					}
-					if(toutVaBien)try{
-						port=Integer.parseInt(textPort.getText());
-						if(port<1024 || port >65356){
-							toutVaBien=false;
-							JOptionPane.showMessageDialog(new JFrame(), "Saisir un numero de port entier entre 1024 et 65356");
-						}
-					}catch(Exception ex){
+				try{
+					port=Integer.parseInt(textPort.getText());
+					if(port<1024 || port >65356){
 						toutVaBien=false;
 						JOptionPane.showMessageDialog(new JFrame(), "Saisir un numero de port entier entre 1024 et 65356");
 					}
+				}catch(Exception ex){
+					toutVaBien=false;
+					JOptionPane.showMessageDialog(new JFrame(), "Saisir un numero de port entier entre 1024 et 65356");
+				}
+				if(toutVaBien && !validIP(textIp.getText())){
+					toutVaBien=false;
+					JOptionPane.showMessageDialog(new JFrame(), "Saisir une adresse ip valide");
+				}
+				if(toutVaBien)if(textID.getText()==null || textID.getText().isEmpty()){
+					toutVaBien=false;
+					JOptionPane.showMessageDialog(new JFrame(), "Saisir un identifiant pour le capteur");
+				}
+				if(toutVaBien)if(rdbtnExterieur.isSelected()){
+					TypeCapExter t=getTypeExter((String)mesureBox.getSelectedItem());
+					GPSCoord gps=null;
 					if(toutVaBien) try{
 						toutVaBien=true;
 						double lat = Double.parseDouble(textLat.getText());
 						double lon = Double.parseDouble(textLon.getText());
+						while(lat>90 || lat<=-90) lat=lat<0?lat+90:lat-90;
+						while(lon>180 || lon<=-180) lon=lon<0?lon+180:lon-180;
+						textLat.setText(String.valueOf(lat));
+						textLon.setText(String.valueOf(lon));
 						gps= new GPSCoord(lat,lon);
 					} catch (Exception e1) {
 						toutVaBien=false;
@@ -337,20 +403,6 @@ public class Fenetre extends JFrame {
 				}else{
 					TypeCapInter t =getTypeInter((String)mesureBox.getSelectedItem());
 					int etage=0;
-					if(textID.getText()==null || textID.getText().isEmpty()){
-						toutVaBien=false;
-						JOptionPane.showMessageDialog(new JFrame(), "Saisir un identifiant pour le capteur");
-					}
-					if(toutVaBien)try{
-						port=Integer.parseInt(textPort.getText());
-						if(port<1024 || port >65356){
-							toutVaBien=false;
-							JOptionPane.showMessageDialog(new JFrame(), "Saisir un numero de port entier entre 1024 et 65356");
-						}
-					}catch(Exception ex){
-						toutVaBien=false;
-						JOptionPane.showMessageDialog(new JFrame(), "Saisir un numero de port entier entre 1024 et 65356");
-					}
 					if(toutVaBien) try{
 						etage=Integer.parseInt((String)etageBox.getSelectedItem());
 					}catch(Exception ex){
@@ -360,7 +412,7 @@ public class Fenetre extends JFrame {
 					if(toutVaBien){
 						Batiment bat=new Batiment((String)batiBox.getSelectedItem(), 0, 0);
 						try{
-							CapteurInterieur ci=new CapteurInterieur(textID.getText(),new Emplacement(bat, etage, (String)salleBox.getSelectedItem(), (String)posBox.getSelectedItem()),t,textIp.getText(),port);
+							CapteurInterieur ci=new CapteurInterieur(textID.getText(),new Emplacement(bat, etage, (String)salleBox.getSelectedItem(),textPos.getText()),t,textIp.getText(),port);
 							toutVaBien=ci.envoyerConnexionCapteur();
 							pb.setMaximum(ci.getFrequence()*25);
 							frequence=ci.getFrequence();
@@ -407,7 +459,7 @@ public class Fenetre extends JFrame {
 				}else{
 					try {
 						CapteurInterieur ci=new CapteurInterieur(textID.getText(), null, null, textIp.getText(), Integer.parseInt(textPort.getText()));
-						if(ci.deconnecterCapteur()){							
+						if(ci.deconnecterCapteur()){
 							connectB.setEnabled(true);
 							deconnectB.setEnabled(false);
 							textIp.setEnabled(true);

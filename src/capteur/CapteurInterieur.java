@@ -26,7 +26,7 @@ public class CapteurInterieur {
 		ID=id;
 		emplacement=e;
 		type=t;
-		switch(t){
+		if(t!=null)switch(t){
 		case TEMPERATURE:
 			this.uniteDeMesure="degre Celsius('C)";
 			this.intervalleMin=-10; this.intervalleMax=50;

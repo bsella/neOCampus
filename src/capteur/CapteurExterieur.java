@@ -25,8 +25,8 @@ public class CapteurExterieur {
 	public CapteurExterieur(String ID, GPSCoord gps, TypeCapExter t, String adr, int port)  throws Exception{
 		sToServer= new Socket(adr, port);
 		this.ID=ID;
-		this.emplacement=gps;
-		this.type=t;
+		emplacement=gps;
+		type=t;
 		if(t!=null)switch(t){
 			case HUMIDITE:
 				this.uniteDeMesure="%";
