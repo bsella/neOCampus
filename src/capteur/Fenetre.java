@@ -13,6 +13,7 @@ public class Fenetre extends JFrame {
 	private static final long serialVersionUID = 1L;
 	boolean connected=false;
 	int frequence;
+	private ServeurCapteur sc;
 	
 	/**
 	 * Launch the application.
@@ -33,41 +34,27 @@ public class Fenetre extends JFrame {
 	}
 	
 	private boolean validIP (String ip) {
-	    try {
-	        if ( ip == null || ip.isEmpty() ) {
-	            return false;
-	        }
+	    try{
+	        if(ip == null || ip.isEmpty()) return false;
+	        String[] parts = ip.split("\\.");
+	        if (parts.length != 4) return false;
 
-	        String[] parts = ip.split( "\\." );
-	        if ( parts.length != 4 ) {
-	            return false;
+	        for(String s : parts){
+	            int i = Integer.parseInt(s);
+	            if((i<0) || (i>255)) return false;
 	        }
-
-	        for ( String s : parts ) {
-	            int i = Integer.parseInt( s );
-	            if ( (i < 0) || (i > 255) ) {
-	                return false;
-	            }
-	        }
-	        if ( ip.endsWith(".") ) {
-	            return false;
-	        }
-
+	        if(ip.endsWith(".")) return false;
 	        return true;
-	    } catch (NumberFormatException nfe) {
+	    }catch (NumberFormatException nfe){
 	        return false;
 	    }
 	}
-	
-	public String[] bats;
-	public String[] etages;
-	public String[] salles;
 	
 	private TypeCapExter getTypeExter(String t){
 		switch(t){
 			case "Pression":
 				return TypeCapExter.PRESSION_ATMOSPHERIQUE;
-			case "Vitesse Vent":
+			case "Vitesse vent":
 				return TypeCapExter.VITESSE_VENT;
 			case "Température":
 				return TypeCapExter.TEMPERATURE;
@@ -93,6 +80,8 @@ public class Fenetre extends JFrame {
 				return TypeCapInter.EAU_FROIDE;
 			case "Eau chaude":
 				return TypeCapInter.EAU_CHAUDE;
+			case "Consommation éclairage":
+				return TypeCapInter.CONSOMMATION_ECLAIRAGE;
 			default: return null;
 		}
 	}
@@ -233,8 +222,8 @@ public class Fenetre extends JFrame {
 				if (pb.getValue()==pb.getMaximum()){
 					if(rdbtnExterieur.isSelected()){
 						try{
-							CapteurExterieur ce= new CapteurExterieur(textID.getText(), null, getTypeExter((String)mesureBox.getSelectedItem()), textIp.getText(), Integer.parseInt(textPort.getText()));
-							ce.envoyerValeurCapteur(ce.simule());
+							CapteurExterieur ce= new CapteurExterieur(textID.getText(), null, getTypeExter((String)mesureBox.getSelectedItem()));
+							sc.envoyerValeurCapteur(ce.simule());
 						}catch (Exception e1){
 							JOptionPane.showMessageDialog(new JFrame(), "Erreur : serveur non connecte");
 							connectB.setEnabled(true);
@@ -249,8 +238,8 @@ public class Fenetre extends JFrame {
 						}
 					}else{
 						try{
-							CapteurInterieur ci= new CapteurInterieur(textID.getText(), null, getTypeInter((String)mesureBox.getSelectedItem()), textIp.getText(), Integer.parseInt(textPort.getText()));
-							ci.envoyerValeurCapteur(ci.simule());
+							CapteurInterieur ci= new CapteurInterieur(textID.getText(), null, getTypeInter((String)mesureBox.getSelectedItem()));
+							sc.envoyerValeurCapteur(ci.simule());
 						}catch (Exception e1){
 							JOptionPane.showMessageDialog(new JFrame(), "Erreur : serveur non connecte");
 							connectB.setEnabled(true);
@@ -274,9 +263,9 @@ public class Fenetre extends JFrame {
 				mesureBox.addItem("Vitesse vent");
 				
 				mesureBox.removeItem("Consommation éclairage");
-				mesureBox.removeItem("Volume Sonore");
+				mesureBox.removeItem("Volume sonore");
 				mesureBox.removeItem("Eau froide");
-				mesureBox.removeItem("Eau Chaude");
+				mesureBox.removeItem("Eau chaude");
 				textLon.setVisible(true);
 				textLat.setVisible(true);
 				lblLongitude.setVisible(true);
@@ -296,9 +285,9 @@ public class Fenetre extends JFrame {
 		rdbtnInterieur.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				mesureBox.addItem("Consommation éclairage");
-				mesureBox.addItem("Volume Sonore");
+				mesureBox.addItem("Volume sonore");
 				mesureBox.addItem("Eau froide");
-				mesureBox.addItem("Eau Chaude");
+				mesureBox.addItem("Eau chaude");
 				
 				mesureBox.removeItem("Pression");
 				mesureBox.removeItem("Vitesse vent");
@@ -322,9 +311,9 @@ public class Fenetre extends JFrame {
 		capteur.add(mesureBox);
 		
 		GestionFichierPositionExterieur g= new GestionFichierPositionExterieur("/Users/karim/Documents/workspace/neOCampus/src/capteur/format_bat");
-		bats=g.listeBatiment();
-		etages = g.listeEtageFromBatiment(bats[0]);
-		salles=g.listeSalleFromEtageAndBatiment(bats[0],etages[0]);
+		String[] bats=g.listeBatiment();
+		String[] etages = g.listeEtageFromBatiment(bats[0]);
+		String[] salles=g.listeSalleFromEtageAndBatiment(bats[0],etages[0]);
 		for(String s : bats) batiBox.addItem(s);
 		for(String s : etages) etageBox.addItem(s);
 		for(String s : salles) salleBox.addItem(s);
@@ -391,8 +380,9 @@ public class Fenetre extends JFrame {
 						JOptionPane.showMessageDialog(new JFrame(), "Saisir des valeurs decimales pour la longitude et latitude");
 					}
 					if(toutVaBien) try{
-						CapteurExterieur ce= new CapteurExterieur(textID.getText(), gps, t,textIp.getText(),port);
-						toutVaBien=ce.envoyerConnectionCapteur();	
+						CapteurExterieur ce= new CapteurExterieur(textID.getText(), gps, t);
+						sc=new ServeurCapteur(textIp.getText(),port);
+						toutVaBien=sc.envoyerConnexionCapteur(ce);	
 						pb.setMaximum(ce.getFrequence()*25);
 						frequence=ce.getFrequence();
 					}
@@ -412,8 +402,9 @@ public class Fenetre extends JFrame {
 					if(toutVaBien){
 						Batiment bat=new Batiment((String)batiBox.getSelectedItem(), 0, 0);
 						try{
-							CapteurInterieur ci=new CapteurInterieur(textID.getText(),new Emplacement(bat, etage, (String)salleBox.getSelectedItem(),textPos.getText()),t,textIp.getText(),port);
-							toutVaBien=ci.envoyerConnexionCapteur();
+							CapteurInterieur ci=new CapteurInterieur(textID.getText(),new Emplacement(bat, etage, (String)salleBox.getSelectedItem(),textPos.getText()),t);
+							sc=new ServeurCapteur(textIp.getText(),port);
+							toutVaBien=sc.envoyerConnexionCapteur(ci);
 							pb.setMaximum(ci.getFrequence()*25);
 							frequence=ci.getFrequence();
 						}catch(Exception ex){
@@ -423,7 +414,7 @@ public class Fenetre extends JFrame {
 					}
 				}
 				if(toutVaBien){
-					JOptionPane.showMessageDialog(new JFrame(), "Connection reussie");
+					JOptionPane.showMessageDialog(new JFrame(), "Connexion reussie");
 					connected=true;
 					connectB.setEnabled(false);
 					deconnectB.setEnabled(true);
@@ -440,8 +431,8 @@ public class Fenetre extends JFrame {
 			public void actionPerformed(ActionEvent e){
 				if(rdbtnExterieur.isSelected()){
 					try {
-						CapteurExterieur ce=new CapteurExterieur(textID.getText(), null, null, textIp.getText(), Integer.parseInt(textPort.getText()));
-						if(ce.deconnecterCapteur()){							
+						CapteurExterieur ce=new CapteurExterieur(textID.getText(), null, null);
+						if(sc.deconnecterCapteur(ce.getID())){							
 							connectB.setEnabled(true);
 							deconnectB.setEnabled(false);
 							textIp.setEnabled(true);
@@ -458,8 +449,8 @@ public class Fenetre extends JFrame {
 					}
 				}else{
 					try {
-						CapteurInterieur ci=new CapteurInterieur(textID.getText(), null, null, textIp.getText(), Integer.parseInt(textPort.getText()));
-						if(ci.deconnecterCapteur()){
+						CapteurInterieur ci=new CapteurInterieur(textID.getText(), null, null);
+						if(sc.deconnecterCapteur(ci.getID())){
 							connectB.setEnabled(true);
 							deconnectB.setEnabled(false);
 							textIp.setEnabled(true);
@@ -477,6 +468,7 @@ public class Fenetre extends JFrame {
 				}
 			}
 		});
+		
 		setLayout(new GridLayout(1, 1));
 		contentPane.add(tp);
 	}

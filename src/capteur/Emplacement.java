@@ -27,4 +27,12 @@ public class Emplacement {
 	public String getDescriptif(){
 		return descriptif;
 	}
+	public int compareTo(Emplacement e){
+		int c=this.batiment.compareTo(e.batiment);
+		if(c!=0) return c;
+		if(this.etage>e.etage) return 1;
+		if(this.etage<e.etage) return -1;
+		c=this.salle.compareTo(e.salle);
+		return c;
+	}
 }

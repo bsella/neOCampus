@@ -16,4 +16,7 @@ public class Batiment {
 	public String toString(){
 		return nom;
 	}
+	public int compareTo(Batiment b){
+		return this.nom.compareTo(b.nom);
+	}
 }

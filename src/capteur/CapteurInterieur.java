@@ -1,12 +1,9 @@
 package capteur;
 
-import java.io.PrintStream;
-import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
-import java.util.Scanner;
 
 public class CapteurInterieur {
 	private String ID;
@@ -18,11 +15,8 @@ public class CapteurInterieur {
 	protected double margeDeConfiance;
 	private int frequence;
 	private String date;
-	private Socket sToServer;
 	
-	
-	public CapteurInterieur(String id ,Emplacement e, TypeCapInter t, String adr, int port) throws Exception{
-		sToServer=new Socket(adr,port);
+	public CapteurInterieur(String id ,Emplacement e, TypeCapInter t){
 		ID=id;
 		emplacement=e;
 		type=t;
@@ -84,35 +78,14 @@ public class CapteurInterieur {
 		this.date=dateFormat.format(date);
 	}
 	
-	public boolean envoyerConnexionCapteur() throws Exception{
-		PrintStream p= new PrintStream(sToServer.getOutputStream());
-		p.println("ConnexionCapteur;"+ID+";"+type+";"+emplacement.getBatiment()+";"+emplacement.getEtage()+";"+emplacement.getSalle()+";"+emplacement.getDescriptif());
-		@SuppressWarnings("resource")
-		Scanner sc=new Scanner(sToServer.getInputStream());
-		String conf =sc.nextLine();
-		if(conf.equals("ConnexionOK")){
-			System.out.println("Connexion du capteur "+ ID + " reussie");
-			return true;
-		}
-		else{
-			System.out.println("Connexion du capteur "+ ID + " echouee");
-			return false;
-		}
+	public String getID(){
+		return ID;
 	}
-	
-	public boolean deconnecterCapteur() throws Exception{
-		PrintStream p= new PrintStream(sToServer.getOutputStream());
-		p.println("DeconnexionCapteur;"+ID);
-		@SuppressWarnings("resource")
-		Scanner sc=new Scanner(sToServer.getInputStream());
-		String conf =sc.nextLine();
-		if(conf.equals("DeconnexionOK")){
-			System.out.println("Deconnexion du capteur "+ ID + " reussie");
-			return true;
-		}else{
-			System.out.println("Deconnexion du capteur "+ ID + " echouee");
-			return false;
-		}		
+	public TypeCapInter getType(){
+		return this.type;
+	}
+	public Emplacement getEmplacement(){
+		return this.emplacement;
 	}
 	public String getDate(){
 		return date;
@@ -125,8 +98,12 @@ public class CapteurInterieur {
 		double d=(intervalleMin+(intervalleMax-intervalleMin)*r.nextDouble())/precision;
 		return (int)d*precision;
 	}
-	public void envoyerValeurCapteur(double val) throws Exception{
-		PrintStream p=new PrintStream(sToServer.getOutputStream());
-		p.println("ValeurCapteur;"+val);
+	public int compareTo(CapteurInterieur c2) {
+		int c=this.emplacement.compareTo(c2.emplacement);
+		if(c!=0) return c;
+		return this.ID.compareTo(c2.ID);
+	}
+	public String toString(){
+		return this.ID+" "+this.emplacement.toString();
 	}
 }

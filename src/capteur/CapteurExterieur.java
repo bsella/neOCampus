@@ -1,12 +1,9 @@
 package capteur;
 
-import java.io.PrintStream;
-import java.net.Socket;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
-import java.util.Scanner;
 
 public class CapteurExterieur {
 	private String ID;
@@ -19,11 +16,8 @@ public class CapteurExterieur {
 	protected double margeDeConfiance;
 	private int frequence;
 	private String date;
-	
-	private Socket sToServer;
 
-	public CapteurExterieur(String ID, GPSCoord gps, TypeCapExter t, String adr, int port)  throws Exception{
-		sToServer= new Socket(adr, port);
+	public CapteurExterieur(String ID, GPSCoord gps, TypeCapExter t){
 		this.ID=ID;
 		emplacement=gps;
 		type=t;
@@ -63,41 +57,21 @@ public class CapteurExterieur {
 				this.margeDeConfiance=.3;
 				this.frequence=20;
 				break;
-			default:
-				this.intervalleMin=20; this.intervalleMax=30;
+			default:break;
 		}
 		DateFormat dateFormat= new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		Date date= new Date();
 		this.date=dateFormat.format(date);
 	}
-	public boolean envoyerConnectionCapteur() throws Exception{
-		PrintStream p=new PrintStream(sToServer.getOutputStream());
-		p.println("ConnexionCapteur;"+ID+";"+type+";"+emplacement.getLatitude()+";"+emplacement.getLongitude());
-		@SuppressWarnings("resource")
-		Scanner sc=new Scanner(sToServer.getInputStream());
-		String conf =sc.nextLine();
-		if(conf.equals("ConnexionOK")){
-			System.out.println("Connexion du capteur "+ ID + " reussie");
-			return true;
-		}
-		else{
-			System.out.println("Connexion du capteur "+ ID + " echouee");
-			return false;
-		}
+	
+	public String getID(){
+		return ID;
 	}
-	public boolean deconnecterCapteur() throws Exception{
-		PrintStream p= new PrintStream(sToServer.getOutputStream());
-		p.println("DeconnexionCapteur;"+ID);
-		@SuppressWarnings("resource")
-		Scanner sc=new Scanner(sToServer.getInputStream());
-		String conf =sc.nextLine();
-		if(conf.equals("DeconnexionOK")){
-			System.out.println("Deconnexion du capteur "+ ID + " reussie");
-			return true;
-		}else{
-			System.out.println("Deconnexion du capteur "+ ID + " echouee");
-			return false;
-		}		
+	public TypeCapExter getType(){
+		return this.type;
+	}
+	public GPSCoord getEmplacement(){
+		return this.emplacement;
 	}
 	public String getDate(){
 		return date;
@@ -110,8 +84,10 @@ public class CapteurExterieur {
 		double d= intervalleMin+r.nextDouble()*(intervalleMax-intervalleMin);
 		return (double)((int)(d/precision)*precision);
 	}
-	public void envoyerValeurCapteur(double val) throws Exception{
-		PrintStream p=new PrintStream(sToServer.getOutputStream());
-		p.println("ValeurCapteur;"+val);
+	public int compareTo(CapteurExterieur c){
+		return this.emplacement.compareTo(c.emplacement);
+	}
+	public String toString(){
+		return this.ID+" "+this.emplacement.toString();
 	}
 }
