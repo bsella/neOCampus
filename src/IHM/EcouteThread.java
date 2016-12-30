@@ -1,18 +1,33 @@
 package IHM;
 
+import java.io.PipedOutputStream;
 import javax.swing.DefaultListModel;
 
 public class EcouteThread extends Thread{
 	private ServeurIHM sIHM;
 	private DefaultListModel<String> lm;
-	public EcouteThread(ServeurIHM sIHM, DefaultListModel<String> lm){
+	private boolean running;
+	PipedOutputStream out;
+	public EcouteThread(ServeurIHM sIHM, DefaultListModel<String> lm, PipedOutputStream out){
 		this.sIHM=sIHM;
 		this.lm=lm;
+		this.out=out;
+		running = true;
+	}
+	public void terminate(){
+		running=false;
+	}
+	public void send(String message)throws Exception{
+		for(char c : message.toCharArray()){
+			out.write(c);
+		}
+		out.write('\0');
 	}
 	public void run(){
-		while(true){
+		while(running){
 			try{
-				String buff =sIHM.ecouteCapteur();
+				String buff =sIHM.read();
+				if(buff!=null)send(buff);
 				String parts[]= buff.split(";");
 				if(parts[0].equals("CapteurPresent")){
 					buff=parts[1];
@@ -24,5 +39,8 @@ public class EcouteThread extends Thread{
 				break;
 			}
 		}
+		try{
+			this.join();
+		}catch(Exception e){}
 	}
 }

@@ -1,9 +1,10 @@
 package IHM;
 
-import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,7 +24,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTree;
-import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -41,7 +41,6 @@ import capteur.TypeCapInter;
 public class Fenetre extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private ServeurIHM sIHM;
-	private EcouteThread ecouteThread;
 	boolean connected=false;
 	
 	private NavigableSet<CapteurInterieur> captInt=
@@ -66,7 +65,6 @@ public class Fenetre extends JFrame {
 	        if(ip == null || ip.isEmpty()) return false;
 	        String[] parts = ip.split("\\.");
 	        if (parts.length != 4) return false;
-
 	        for(String s : parts){
 	            int i = Integer.parseInt(s);
 	            if((i<0) || (i>255)) return false;
@@ -76,6 +74,49 @@ public class Fenetre extends JFrame {
 	    }catch (NumberFormatException nfe){
 	        return false;
 	    }
+	}
+	
+	private TypeCapExter getTypeExter(String t){
+		switch(t){
+			case "PRESSION":
+				return TypeCapExter.PRESSION_ATMOSPHERIQUE;
+			case "VITESSE_VENT":
+				return TypeCapExter.VITESSE_VENT;
+			case "TEMPERATURE":
+				return TypeCapExter.TEMPERATURE;
+			case "HUMIDITE":
+				return TypeCapExter.HUMIDITE;
+			case "LUMINOSITE":
+				return TypeCapExter.LUMINOSITE;
+			default: return null;
+		}
+	}
+	private TypeCapInter getTypeInter(String t){
+		switch(t){
+			case "TEMPERATURE":
+				return TypeCapInter.TEMPERATURE;
+			case "HUMIDITE":
+				return TypeCapInter.HUMIDITE;
+			case "LUMINOSITE":
+				return TypeCapInter.LUMINOSITE;
+			case "VOLUME_SONORE":
+				return TypeCapInter.VOLUME_SONORE;
+			case "EAU_FROIDE":
+				return TypeCapInter.EAU_FROIDE;
+			case "EAU_CHAUDE":
+				return TypeCapInter.EAU_CHAUDE;
+			case "CONSOMMATION_ECLAIRAGE":
+				return TypeCapInter.CONSOMMATION_ECLAIRAGE;
+			default: return null;
+		}
+	}
+	
+	int getIndex(String[] ss, String s){
+		for(int i=0; i<ss.length; i++){
+			if(ss[i].equals(s))
+				return i;
+		}
+		return -1;
 	}
 	
 	public Fenetre() throws Exception{
@@ -91,25 +132,26 @@ public class Fenetre extends JFrame {
 		Container data = new Container();
 		tp.addTab("Connexion", connexion);
 		tp.addTab("Data", data);
-		data.setLayout(new BorderLayout());
+		GridBagLayout gbl = new GridBagLayout();
+		data.setLayout(gbl);
 		connexion.setLayout(null);
 		
 		JLabel lblID = new JLabel("Identifiant :");
 		JLabel lblIp = new JLabel("Addresse du serveur :");
-		JLabel lblPort = new JLabel("Numero de port :");
-		JTextField textID = new JTextField();
-		JTextField textIp = new JTextField();
-		JTextField textPort = new JTextField();
+		JLabel lblPort = new JLabel("Numéro de port :");
+		JTextField textID = new JTextField("hjsf");
+		JTextField textIp = new JTextField("127.0.0.1");
+		JTextField textPort = new JTextField("7888");
 		JButton connectB = new JButton("Connexion au Serveur");
-		JButton deconnectB = new JButton("Deconnexion");
-		
-		JTable dataTable=new JTable();
+		JButton deconnectB = new JButton("Déconnexion");
+
+		JTable interDataTable=new JTable();
+		JTable exterDataTable=new JTable();
 		DefaultListModel<String> capteurListModel= new DefaultListModel<>();
 		JList<String> list=new JList<>(capteurListModel);
-		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		JScrollPane listScroll=new JScrollPane(list);
 		listScroll.setPreferredSize(new Dimension(600,100));
-		data.add(listScroll, BorderLayout.PAGE_END);
+		//data.add(listScroll);
 		
 		DefaultMutableTreeNode root =new DefaultMutableTreeNode("capteurs");
 		DefaultMutableTreeNode treeInt =new DefaultMutableTreeNode("interieurs");
@@ -118,7 +160,7 @@ public class Fenetre extends JFrame {
 		root.add(treeExt);
 		JTree capteurTree=new JTree(root);
 		DefaultTreeModel tmodel = (DefaultTreeModel)capteurTree.getModel();
-		data.add(capteurTree, BorderLayout.LINE_END);
+		//data.add(capteurTree);
 		for(CapteurInterieur ci : captInt)
 			treeInt.add(new DefaultMutableTreeNode(ci.toString()));
 		for(CapteurExterieur ce : captExt)
@@ -142,8 +184,24 @@ public class Fenetre extends JFrame {
 		connexion.add(textPort);
 		connexion.add(connectB);
 		connexion.add(deconnectB);
-		//data.add(dataTable);
-		//data.add(capteursTree);
+		GridBagConstraints c= new GridBagConstraints();
+		c.weightx=5;
+		c.weighty=5;
+		c.fill=GridBagConstraints.BOTH;
+		gbl.setConstraints(exterDataTable, c);
+		data.add(exterDataTable);
+		c.weightx=1;
+		gbl.setConstraints(capteurTree, c);
+		data.add(capteurTree);
+		c.gridy=1;
+		c.weightx=5;
+		c.weighty=1;
+		gbl.setConstraints(listScroll, c);
+		data.add(listScroll);
+		JButton inscB= new JButton("S'inscrire");
+		c.weightx=1;
+		gbl.setConstraints(inscB, c);
+		data.add(inscB);
 		
 		connectB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
@@ -168,21 +226,20 @@ public class Fenetre extends JFrame {
 					JOptionPane.showMessageDialog(new JFrame(), "Saisir un identifiant pour le capteur");
 				}
 				if(toutVaBien)try{
-					sIHM=new ServeurIHM(textIp.getText(),port);
+					sIHM=new ServeurIHM(textIp.getText(),port,capteurListModel);
 					toutVaBien=sIHM.envoyerConnexionIHM(textID.getText());
-					if(!toutVaBien)JOptionPane.showMessageDialog(new JFrame(), "Connexion refusee");
+					if(!toutVaBien)JOptionPane.showMessageDialog(new JFrame(), "Connexion refusée");
 				}catch(Exception ex){
 					toutVaBien=false;
 					JOptionPane.showMessageDialog(new JFrame(), "Erreur de connexion au serveur");
 				}
 				if(toutVaBien){
-					ecouteThread=new EcouteThread(sIHM, capteurListModel);
-					ecouteThread.start();
-					JOptionPane.showMessageDialog(new JFrame(), "Connexion reussie");
+					JOptionPane.showMessageDialog(new JFrame(), "Connexion réussie");
 					connected=true;
 					connectB.setEnabled(false);
 					deconnectB.setEnabled(true);
 					textIp.setEnabled(false);
+					textID.setEnabled(false);
 					textPort.setEnabled(false);
 					tp.addTab("Data",data);
 					tp.setSelectedComponent(data);
@@ -191,7 +248,6 @@ public class Fenetre extends JFrame {
 		});
 		
 		deconnectB.addActionListener(new ActionListener(){
-			@SuppressWarnings("deprecation")
 			public void actionPerformed(ActionEvent e){
 				try{
 					if(sIHM.deconnecterIHM(textID.getText())){
@@ -201,46 +257,61 @@ public class Fenetre extends JFrame {
 						textPort.setEnabled(true);
 						connected=false;
 						tp.remove(data);
-						//ecouteThread.stop();
 					}
-					else JOptionPane.showMessageDialog(new JFrame(), "Deconnexion refusee");
+					else JOptionPane.showMessageDialog(new JFrame(), "Déconnexion refusée");
 				} catch (Exception e1){
-					JOptionPane.showMessageDialog(new JFrame(), "Erreur de deconnexion??");
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(new JFrame(), "Erreur de déconnexion??");
 				}
 			}
 		});
 		
-		list.addListSelectionListener(new ListSelectionListener(){
-			public void valueChanged(ListSelectionEvent e){
-				int index=list.getSelectedIndex();
-				if(index>=0){
-					String buff=capteurListModel.get(index);
-					String[] parts=buff.split(";");
-					if(parts.length==4){
-						GPSCoord gps= new GPSCoord(Double.parseDouble(parts[2]),Double.parseDouble(parts[3]));
-						TypeCapExter t= TypeCapExter.HUMIDITE;
-						CapteurExterieur ce =new CapteurExterieur(parts[0], gps, t);
-						captExt.add(ce);
-						treeExt.removeAllChildren();
-						for(CapteurExterieur c : captExt)
-							treeExt.add(new DefaultMutableTreeNode(c.toString()));
-						tmodel.reload(treeExt);
-					}else
-					if(parts.length==6){
-						Emplacement emp=new Emplacement(new Batiment(parts[2],0,0), Integer.parseInt(parts[3]), parts[4], parts[5]);
-						TypeCapInter t= TypeCapInter.CONSOMMATION_ECLAIRAGE;
-						CapteurInterieur ci = new CapteurInterieur(parts[0], emp, t);
-						captInt.add(ci);
-						treeInt.removeAllChildren();
-						for(CapteurInterieur c : captInt)
-							treeInt.add(new DefaultMutableTreeNode(c.toString()));
-						tmodel.reload(treeInt);
+		list.addListSelectionListener(new ListSelectionListener() {
+			public void valueChanged(ListSelectionEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		
+		inscB.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				int ind[]=list.getSelectedIndices();
+				String[] capteurInscription= new String[ind.length];
+				for(int i=0; i<ind.length; i++){//obtenir les identifiants des capteurs selectionnés
+					capteurInscription[i]=capteurListModel.get(ind[i]);
+					String[] parts=capteurInscription[i].split(";");
+					capteurInscription[i]=parts[0];
+				}
+				try{
+					String[] capteurValide = sIHM.inscrire(textID.getText(), capteurInscription);
+					for(String cap : capteurValide){
+						int i= getIndex(capteurInscription, cap);
+						String[] parts=capteurListModel.get(ind[i]).split(";");
+						if(parts.length==4 || parts.length==6){
+							if(parts.length==4){
+								GPSCoord gps= new GPSCoord(Double.parseDouble(parts[2]),Double.parseDouble(parts[3]));
+								TypeCapExter t= getTypeExter(parts[1]);
+								CapteurExterieur ce =new CapteurExterieur(parts[0], gps, t);
+								captExt.add(ce);
+								treeExt.removeAllChildren();
+								for(CapteurExterieur c : captExt)
+									treeExt.add(new DefaultMutableTreeNode(c.toString()));
+							}else{
+								Emplacement emp=new Emplacement(new Batiment(parts[2],0,0), Integer.parseInt(parts[3]), parts[4], parts[5]);
+								TypeCapInter t= getTypeInter(parts[1]);
+								CapteurInterieur ci = new CapteurInterieur(parts[0], emp, t);
+								captInt.add(ci);
+								treeInt.removeAllChildren();
+								for(CapteurInterieur c : captInt)
+									treeInt.add(new DefaultMutableTreeNode(c.toString()));
+							}
+							tmodel.reload(root);						
+							capteurListModel.removeElementAt(i);
+						}
 					}
-					capteurListModel.removeElementAt(index);
-				}
+				}catch (Exception e1){}
 			}
 		});
-		
 		setLayout(new GridLayout(1, 1));
 		contentPane.add(tp);
 	}
