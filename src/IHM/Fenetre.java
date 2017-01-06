@@ -27,8 +27,8 @@ import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 
 import capteur.Batiment;
 import capteur.CapteurExterieur;
@@ -119,6 +119,14 @@ public class Fenetre extends JFrame {
 		return -1;
 	}
 	
+	DefaultMutableTreeNode contains(DefaultMutableTreeNode node, Object o){
+		if(o instanceof Batiment)
+			for(int i=0; i<node.getChildCount(); i++)
+				if(node.getChildAt(i)==o)
+					return (DefaultMutableTreeNode) node.getChildAt(i);
+		return null;
+	}
+	
 	public Fenetre() throws Exception{
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 600, 600);
@@ -144,9 +152,13 @@ public class Fenetre extends JFrame {
 		JTextField textPort = new JTextField("7888");
 		JButton connectB = new JButton("Connexion au Serveur");
 		JButton deconnectB = new JButton("Déconnexion");
-
-		JTable interDataTable=new JTable();
-		JTable exterDataTable=new JTable();
+		
+		JPanel dataTable= new JPanel(new GridLayout(2, 1));
+		String[] header= {"test1","test2"};
+		DefaultTableModel dm= new DefaultTableModel(new String[][]{{"bla","bli"},{"ble","blu"}}, header);
+		JTable t = new JTable(dm);
+		dataTable.add(t);
+		
 		DefaultListModel<String> capteurListModel= new DefaultListModel<>();
 		JList<String> list=new JList<>(capteurListModel);
 		JScrollPane listScroll=new JScrollPane(list);
@@ -154,18 +166,12 @@ public class Fenetre extends JFrame {
 		//data.add(listScroll);
 		
 		DefaultMutableTreeNode root =new DefaultMutableTreeNode("capteurs");
-		DefaultMutableTreeNode treeInt =new DefaultMutableTreeNode("interieurs");
-		DefaultMutableTreeNode treeExt =new DefaultMutableTreeNode("exterieurs");
-		root.add(treeInt);
-		root.add(treeExt);
-		JTree capteurTree=new JTree(root);
-		DefaultTreeModel tmodel = (DefaultTreeModel)capteurTree.getModel();
-		//data.add(capteurTree);
-		for(CapteurInterieur ci : captInt)
-			treeInt.add(new DefaultMutableTreeNode(ci.toString()));
-		for(CapteurExterieur ce : captExt)
-			treeExt.add(new DefaultMutableTreeNode(ce.toString()));
-		
+		CapteurTreeModel ctm= new CapteurTreeModel(root);
+		JTree capteurTree=new JTree(ctm);
+		ctm.add(new CapteurInterieur("test1", new Emplacement(new Batiment("U3", 12, 21), 2, "103", "testt"), TypeCapInter.EAU_CHAUDE));	
+		ctm.add(new CapteurInterieur("test2", new Emplacement(new Batiment("U3", 12, 21), 2, "104", "test"), TypeCapInter.EAU_CHAUDE));	
+		ctm.add(new CapteurInterieur("test3", new Emplacement(new Batiment("U2", 12, 21), 1, "104", "test"), TypeCapInter.EAU_CHAUDE));	
+		ctm.add(new CapteurInterieur("test4", new Emplacement(new Batiment("U2", 12, 21), 2, "104", "test"), TypeCapInter.EAU_CHAUDE));	
 		lblID.setBounds(130, 123, 150, 16);
 		textID.setBounds(280, 120, 150, 26);
 		lblIp.setBounds(130, 183, 150, 16);
@@ -188,8 +194,8 @@ public class Fenetre extends JFrame {
 		c.weightx=5;
 		c.weighty=5;
 		c.fill=GridBagConstraints.BOTH;
-		gbl.setConstraints(exterDataTable, c);
-		data.add(exterDataTable);
+		gbl.setConstraints(dataTable, c);
+		data.add(dataTable);
 		c.weightx=1;
 		gbl.setConstraints(capteurTree, c);
 		data.add(capteurTree);
@@ -199,6 +205,7 @@ public class Fenetre extends JFrame {
 		gbl.setConstraints(listScroll, c);
 		data.add(listScroll);
 		JButton inscB= new JButton("S'inscrire");
+		inscB.setEnabled(false);
 		c.weightx=1;
 		gbl.setConstraints(inscB, c);
 		data.add(inscB);
@@ -246,7 +253,7 @@ public class Fenetre extends JFrame {
 				}
 			}
 		});
-		
+		capteurListModel.addElement("test");
 		deconnectB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				try{
@@ -268,8 +275,8 @@ public class Fenetre extends JFrame {
 		
 		list.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				// TODO Auto-generated method stub
-				
+				if(!list.isSelectionEmpty())
+					inscB.setEnabled(true);
 			}
 		});
 		
@@ -293,23 +300,28 @@ public class Fenetre extends JFrame {
 								TypeCapExter t= getTypeExter(parts[1]);
 								CapteurExterieur ce =new CapteurExterieur(parts[0], gps, t);
 								captExt.add(ce);
-								treeExt.removeAllChildren();
-								for(CapteurExterieur c : captExt)
-									treeExt.add(new DefaultMutableTreeNode(c.toString()));
+								//treeExt.removeAllChildren();
+								//for(CapteurExterieur c : captExt)
+									//treeExt.add(new DefaultMutableTreeNode(c.toString()));
 							}else{
 								Emplacement emp=new Emplacement(new Batiment(parts[2],0,0), Integer.parseInt(parts[3]), parts[4], parts[5]);
 								TypeCapInter t= getTypeInter(parts[1]);
 								CapteurInterieur ci = new CapteurInterieur(parts[0], emp, t);
 								captInt.add(ci);
-								treeInt.removeAllChildren();
-								for(CapteurInterieur c : captInt)
-									treeInt.add(new DefaultMutableTreeNode(c.toString()));
+								//treeInt.removeAllChildren();
+								//for(CapteurInterieur c : captInt)
+									//treeInt.
+									//treeInt.add(new DefaultMutableTreeNode(c.toString()));
 							}
-							tmodel.reload(root);						
+							//tmodel.reload(root);						
 							capteurListModel.removeElementAt(i);
 						}
 					}
-				}catch (Exception e1){}
+					list.clearSelection();
+					inscB.setEnabled(false);
+				}catch (Exception e1){
+					System.out.println("Erreur : Inscription au capteur");
+				}
 			}
 		});
 		setLayout(new GridLayout(1, 1));
@@ -322,7 +334,7 @@ public class Fenetre extends JFrame {
 				try{
 					Fenetre frame = new Fenetre();
 					frame.setVisible(true);
-					frame.setResizable(false);
+					//frame.setResizable(false);
 					frame.setLocationRelativeTo(null);
 				}catch (Exception e){
 					e.printStackTrace();

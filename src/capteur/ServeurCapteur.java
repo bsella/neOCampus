@@ -12,6 +12,7 @@ public class ServeurCapteur {
 	public void envoyerValeurCapteur(double val) throws Exception{
 		PrintStream p=new PrintStream(sock.getOutputStream());
 		p.println("ValeurCapteur;"+val);
+		p.flush();
 	}
 	public boolean deconnecterCapteur(String id) throws Exception{
 		PrintStream p= new PrintStream(sock.getOutputStream());
@@ -29,7 +30,9 @@ public class ServeurCapteur {
 	}
 	public boolean envoyerConnexionCapteur(CapteurExterieur ce) throws Exception{
 		PrintStream p=new PrintStream(sock.getOutputStream());
-		p.println("ConnexionCapteur;"+ce.getID()+";"+ce.getType().toString()+";"+ce.getEmplacement().getLatitude()+";"+ce.getEmplacement().getLongitude());
+		p.println("ConnexionCapteur;"+ce.getID()+";"+ce.getType().toString()+";"+ce.getGPS().getLatitude()+";"+ce.getGPS().getLongitude());
+		p.flush();
+		System.out.println("ConnexionCapteur;"+ce.getID()+";"+ce.getType().toString()+";"+ce.getGPS().getLatitude()+";"+ce.getGPS().getLongitude());
 		@SuppressWarnings("resource")
 		Scanner sc=new Scanner(sock.getInputStream());
 		String conf =sc.nextLine();

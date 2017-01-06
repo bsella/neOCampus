@@ -70,7 +70,7 @@ public class CapteurExterieur {
 	public TypeCapExter getType(){
 		return this.type;
 	}
-	public GPSCoord getEmplacement(){
+	public GPSCoord getGPS(){
 		return this.emplacement;
 	}
 	public String getDate(){
@@ -88,6 +88,6 @@ public class CapteurExterieur {
 		return this.emplacement.compareTo(c.emplacement);
 	}
 	public String toString(){
-		return this.ID+" "+this.emplacement.toString();
+		return this.emplacement.toString()+" "+ this.ID;
 	}
 }

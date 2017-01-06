@@ -27,6 +27,7 @@ public class EcouteThread extends Thread{
 		while(running){
 			try{
 				String buff =sIHM.read();
+				System.out.println(buff);
 				if(buff!=null)send(buff);
 				String parts[]= buff.split(";");
 				if(parts[0].equals("CapteurPresent")){

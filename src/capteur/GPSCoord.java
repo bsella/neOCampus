@@ -14,7 +14,7 @@ public class GPSCoord {
 		return latitude;
 	}
 	public String toString(){
-		return "("+latitude+", "+longitude+")";
+		return latitude+", "+longitude;
 	}
 	public int compareTo(GPSCoord gps){
 		if(this.latitude>gps.latitude) return 1;
