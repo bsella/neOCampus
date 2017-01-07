@@ -24,7 +24,6 @@ import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 import capteur.Batiment;
@@ -125,9 +124,10 @@ public class Fenetre extends JFrame {
 		JButton deconnectB = new JButton("Déconnexion");
 		
 		JPanel dataTable= new JPanel(new GridLayout(2, 1));
-		String[] header= {"test1","test2"};
-		DefaultTableModel dm= new DefaultTableModel(new String[][]{{"bla","bli"},{"ble","blu"}}, header);
+		TableauCapteurIntModel dm= new TableauCapteurIntModel();
 		JTable t = new JTable(dm);
+		dm.add(new CapteurInterieur("test1", new Emplacement(new Batiment("U3", 12, 21), 2, "103", "testt"), TypeCapInter.EAU_CHAUDE), 12);
+		
 		dataTable.add(t);
 		
 		DefaultListModel<String> capteurListModel= new DefaultListModel<>();

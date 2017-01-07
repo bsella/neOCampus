@@ -90,4 +90,12 @@ public class CapteurExterieur {
 	public String toString(){
 		return this.emplacement.toString()+" "+ this.ID;
 	}
+	public boolean equals(Object o){
+		if(o instanceof CapteurExterieur){
+			CapteurExterieur c = (CapteurExterieur)o;
+			return ID.equals(c.getID()) && emplacement.equals(c.getGPS())
+					&& type.equals(c.getType());
+		}
+		return false;
+	}
 }

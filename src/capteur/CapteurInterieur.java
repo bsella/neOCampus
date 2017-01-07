@@ -106,4 +106,13 @@ public class CapteurInterieur {
 	public String toString(){
 		return this.ID+" "+this.emplacement.toString();
 	}
+	
+	public boolean equals(Object o){
+		if(o instanceof CapteurInterieur){
+			CapteurInterieur c= (CapteurInterieur)o;
+			return ID.equals(c.getID()) && emplacement.equals(c.getEmplacement())
+					&& type.equals(c.getType());
+		}
+		return false;
+	}
 }

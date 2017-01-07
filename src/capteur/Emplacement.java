@@ -35,4 +35,9 @@ public class Emplacement {
 		c=this.salle.compareTo(e.salle);
 		return c;
 	}
+	public boolean equals(Object o){
+		if(o instanceof Emplacement)
+			return compareTo((Emplacement)o)==0;
+		return false;
+	}
 }
