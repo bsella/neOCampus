@@ -8,9 +8,6 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.NavigableSet;
-import java.util.TreeSet;
-import java.util.Comparator;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -42,24 +39,7 @@ public class Fenetre extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private ServeurIHM sIHM;
 	boolean connected=false;
-	
-	private NavigableSet<CapteurInterieur> captInt=
-			new TreeSet<CapteurInterieur>(
-				new Comparator<CapteurInterieur>(){
-					public int compare(CapteurInterieur c, CapteurInterieur c2){
-						return c.compareTo(c2);
-					}
-				}
-			);
-	private NavigableSet<CapteurExterieur> captExt=
-			new TreeSet<CapteurExterieur>(
-				new Comparator<CapteurExterieur>(){
-					public int compare(CapteurExterieur c, CapteurExterieur c2){
-						return c.compareTo(c2);
-					}
-				}
-			);
-	
+
 	private boolean validIP(String ip){
 	    try{
 	        if(ip == null || ip.isEmpty()) return false;
@@ -119,21 +99,12 @@ public class Fenetre extends JFrame {
 		return -1;
 	}
 	
-	DefaultMutableTreeNode contains(DefaultMutableTreeNode node, Object o){
-		if(o instanceof Batiment)
-			for(int i=0; i<node.getChildCount(); i++)
-				if(node.getChildAt(i)==o)
-					return (DefaultMutableTreeNode) node.getChildAt(i);
-		return null;
-	}
-	
-	public Fenetre() throws Exception{
+	public Fenetre(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 600, 600);
 		JPanel contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
-		contentPane.setLayout(null);
 		
 		JTabbedPane tp= new JTabbedPane();
 		JScrollPane connexion = new JScrollPane();
@@ -165,7 +136,7 @@ public class Fenetre extends JFrame {
 		listScroll.setPreferredSize(new Dimension(600,100));
 		//data.add(listScroll);
 		
-		DefaultMutableTreeNode root =new DefaultMutableTreeNode("capteurs");
+		DefaultMutableTreeNode root =new DefaultMutableTreeNode("Capteurs");
 		CapteurTreeModel ctm= new CapteurTreeModel(root);
 		JTree capteurTree=new JTree(ctm);
 		ctm.add(new CapteurInterieur("test1", new Emplacement(new Batiment("U3", 12, 21), 2, "103", "testt"), TypeCapInter.EAU_CHAUDE));	
@@ -190,6 +161,7 @@ public class Fenetre extends JFrame {
 		connexion.add(textPort);
 		connexion.add(connectB);
 		connexion.add(deconnectB);
+		JScrollPane scrollTree= new JScrollPane(capteurTree);
 		GridBagConstraints c= new GridBagConstraints();
 		c.weightx=5;
 		c.weighty=5;
@@ -197,8 +169,8 @@ public class Fenetre extends JFrame {
 		gbl.setConstraints(dataTable, c);
 		data.add(dataTable);
 		c.weightx=1;
-		gbl.setConstraints(capteurTree, c);
-		data.add(capteurTree);
+		gbl.setConstraints(scrollTree, c);
+		data.add(scrollTree);
 		c.gridy=1;
 		c.weightx=5;
 		c.weighty=1;
@@ -273,14 +245,14 @@ public class Fenetre extends JFrame {
 			}
 		});
 		
-		list.addListSelectionListener(new ListSelectionListener() {
+		list.addListSelectionListener(new ListSelectionListener(){
 			public void valueChanged(ListSelectionEvent e) {
 				if(!list.isSelectionEmpty())
 					inscB.setEnabled(true);
 			}
 		});
 		
-		inscB.addActionListener(new ActionListener() {
+		inscB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				int ind[]=list.getSelectedIndices();
 				String[] capteurInscription= new String[ind.length];
@@ -298,22 +270,13 @@ public class Fenetre extends JFrame {
 							if(parts.length==4){
 								GPSCoord gps= new GPSCoord(Double.parseDouble(parts[2]),Double.parseDouble(parts[3]));
 								TypeCapExter t= getTypeExter(parts[1]);
-								CapteurExterieur ce =new CapteurExterieur(parts[0], gps, t);
-								captExt.add(ce);
-								//treeExt.removeAllChildren();
-								//for(CapteurExterieur c : captExt)
-									//treeExt.add(new DefaultMutableTreeNode(c.toString()));
+								ctm.add(new CapteurExterieur(parts[0], gps, t));
 							}else{
 								Emplacement emp=new Emplacement(new Batiment(parts[2],0,0), Integer.parseInt(parts[3]), parts[4], parts[5]);
 								TypeCapInter t= getTypeInter(parts[1]);
-								CapteurInterieur ci = new CapteurInterieur(parts[0], emp, t);
-								captInt.add(ci);
-								//treeInt.removeAllChildren();
-								//for(CapteurInterieur c : captInt)
-									//treeInt.
-									//treeInt.add(new DefaultMutableTreeNode(c.toString()));
+								ctm.add(new CapteurInterieur(parts[0], emp, t));
 							}
-							//tmodel.reload(root);						
+							//tmodel.reload(root);
 							capteurListModel.removeElementAt(i);
 						}
 					}
@@ -330,15 +293,10 @@ public class Fenetre extends JFrame {
 	
 	public static void main(String[] args){
 		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try{
-					Fenetre frame = new Fenetre();
-					frame.setVisible(true);
-					//frame.setResizable(false);
-					frame.setLocationRelativeTo(null);
-				}catch (Exception e){
-					e.printStackTrace();
-				}
+			public void run(){
+				Fenetre frame = new Fenetre();
+				frame.setVisible(true);
+				frame.setLocationRelativeTo(null);
 			}
 		});
 	}
