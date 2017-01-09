@@ -8,6 +8,8 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -126,7 +128,7 @@ public class Fenetre extends JFrame {
 		JPanel dataTable= new JPanel(new GridLayout(2, 1));
 		TableauCapteurIntModel dm= new TableauCapteurIntModel();
 		JTable t = new JTable(dm);
-		dm.add(new CapteurInterieur("test1", new Emplacement(new Batiment("U3", 12, 21), 2, "103", "testt"), TypeCapInter.EAU_CHAUDE), 12);
+		dm.add(new CapteurInterieur("test1", new Emplacement(new Batiment("U3", 12, 21), 2, "103", "testt"), TypeCapInter.EAU_CHAUDE));
 		
 		dataTable.add(t);
 		
@@ -261,34 +263,39 @@ public class Fenetre extends JFrame {
 					String[] parts=capteurInscription[i].split(";");
 					capteurInscription[i]=parts[0];
 				}
-				try{
-					String[] capteurValide = sIHM.inscrire(textID.getText(), capteurInscription);
-					for(String cap : capteurValide){
-						int i= getIndex(capteurInscription, cap);
-						String[] parts=capteurListModel.get(ind[i]).split(";");
-						if(parts.length==4 || parts.length==6){
-							if(parts.length==4){
-								GPSCoord gps= new GPSCoord(Double.parseDouble(parts[2]),Double.parseDouble(parts[3]));
-								TypeCapExter t= getTypeExter(parts[1]);
-								ctm.add(new CapteurExterieur(parts[0], gps, t));
-							}else{
-								Emplacement emp=new Emplacement(new Batiment(parts[2],0,0), Integer.parseInt(parts[3]), parts[4], parts[5]);
-								TypeCapInter t= getTypeInter(parts[1]);
-								ctm.add(new CapteurInterieur(parts[0], emp, t));
-							}
-							//tmodel.reload(root);
-							capteurListModel.removeElementAt(i);
+				String[] capteurValide = sIHM.inscrire(textID.getText(), capteurInscription);
+				for(String cap : capteurValide){
+					int i= getIndex(capteurInscription, cap);
+					String[] parts=capteurListModel.get(ind[i]).split(";");
+					if(parts.length==4 || parts.length==6){
+						if(parts.length==4){
+							GPSCoord gps= new GPSCoord(Double.parseDouble(parts[2]),Double.parseDouble(parts[3]));
+							TypeCapExter t= getTypeExter(parts[1]);
+							ctm.add(new CapteurExterieur(parts[0], gps, t));
+						}else{
+							Emplacement emp=new Emplacement(new Batiment(parts[2],0,0), Integer.parseInt(parts[3]), parts[4], parts[5]);
+							TypeCapInter t= getTypeInter(parts[1]);
+							CapteurInterieur ci = new CapteurInterieur(parts[0], emp, t);
+							ctm.add(ci);
+							dm.add(ci);
 						}
+						capteurListModel.removeElementAt(i);
 					}
-					list.clearSelection();
-					inscB.setEnabled(false);
-				}catch (Exception e1){
-					System.out.println("Erreur : Inscription au capteur");
 				}
+				list.clearSelection();
+				inscB.setEnabled(false);
 			}
 		});
 		setLayout(new GridLayout(1, 1));
 		contentPane.add(tp);
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e){
+				if(connected){
+					sIHM.deconnecterIHM(textID.getText());
+				}
+				if(sIHM!=null)sIHM.terminateThread();
+			}
+		});
 	}
 	
 	public static void main(String[] args){

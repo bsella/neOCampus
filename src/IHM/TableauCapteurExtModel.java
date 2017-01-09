@@ -61,10 +61,10 @@ public class TableauCapteurExtModel extends AbstractTableModel{
 		return null;
 	}
 	
-	public void add(CapteurExterieur ce, double val){
+	public void add(CapteurExterieur ce){
 		if(!contains(ce)){
 			capList.add(ce);
-			data.add(val);
+			data.add(0.0);
 		}
 	}
 	public void changeVal(CapteurExterieur ce, double val){

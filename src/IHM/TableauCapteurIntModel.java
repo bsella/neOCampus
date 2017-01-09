@@ -65,10 +65,10 @@ public class TableauCapteurIntModel extends AbstractTableModel{
 		return null;
 	}
 	
-	public void add(CapteurInterieur ci, double val){
+	public void add(CapteurInterieur ci){
 		if(!contains(ci)){
 			capList.add(ci);
-			data.add(val);
+			data.add(0.0);
 		}
 	}
 	public void changeVal(CapteurInterieur ci, double val){
