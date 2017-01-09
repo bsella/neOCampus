@@ -1,0 +1,12 @@
+package capteur;
+
+public enum TypeCapInter {
+	TEMPERATURE,
+	HUMIDITE,
+	LUMINOSITE,
+	VOLUME_SONORE,
+	CONSOMMATION_ECLAIRAGE,
+	EAU_FROIDE,
+	EAU_CHAUDE
+}
+
