@@ -282,7 +282,6 @@ public class Fenetre extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				mesureBox.addItem("Pression");
 				mesureBox.addItem("Vitesse vent");
-				
 				mesureBox.removeItem("Consommation éclairage");
 				mesureBox.removeItem("Volume sonore");
 				mesureBox.removeItem("Eau froide");

@@ -1,10 +1,9 @@
 package IHM;
 
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.concurrent.Semaphore;
 
 import javax.swing.DefaultListModel;
 
@@ -12,16 +11,22 @@ import capteur.Capteur;
 
 public class ServeurIHM{
 	private Socket sock;
-	PipedOutputStream out= new PipedOutputStream();
-	PipedInputStream in= new PipedInputStream(out);
-	private TableauCapteurModel tcm;
-	DefaultListModel<String> lm;
-	private EcouteThread et= new EcouteThread(this,out);
-	public ServeurIHM(String adr, int port, DefaultListModel<String> lm) throws Exception{
+	private static Semaphore mutex= new Semaphore(0);
+	private String buffer;
+	private EcouteThread et= new EcouteThread(this);
+	private DefaultListModel<String> lm;
+	private TableauCapteurModel tableauModel;
+	private CapteurTreeModel treeModel;
+	public ServeurIHM(String adr, int port, DefaultListModel<String> lm, TableauCapteurModel tcm) throws Exception{
 		this.lm=lm;
+		this.tableauModel=tcm;
 		sock=new Socket(adr,port);
-		et=new EcouteThread(this, out);
+		et=new EcouteThread(this);
 		et.start();
+	}
+	public void updateBuffer(String s){
+		buffer=s;
+		mutex.release();
 	}
 	public String read(){
 		try{
@@ -35,18 +40,14 @@ public class ServeurIHM{
 		}
 		return null;
 	}
+	
 	public String readThread(){
-		String buff="";
-		char c;
 		try{
-			do{
-				c=(char)in.read();
-				if(c!='\0')buff+=c;
-			}while(c!='\0');
-		}catch(Exception e){
-			System.out.println("erreur lors de la lecture du thread");
+			mutex.acquire();
+		}catch (InterruptedException e){
+			e.printStackTrace();
 		}
-		return buff;
+		return buffer;
 	}
 	public void send(String message){
 		PrintStream p;
@@ -114,9 +115,14 @@ public class ServeurIHM{
 		lm.addElement(buff);
 	}
 	public void addToTable(Capteur c){
-		tcm.add(c);
+		tableauModel.add(c);
 	}
-	public void changeVal(Capteur c, double val){
-		tcm.changeVal(c, val);
+	public void changeVal(String id, double val){
+		tableauModel.changeVal(tableauModel.stringToCapteur(id), val);
+	}
+	public void remove(String id){
+		//TODO REMOVE
+		treeModel.remove(tableauModel.stringToCapteur(id));
+		tableauModel.remove(tableauModel.stringToCapteur(id));
 	}
 }

@@ -1,36 +1,34 @@
 package IHM;
 
-import java.io.PipedOutputStream;
-
 public class EcouteThread extends Thread{
 	private ServeurIHM sIHM;
 	private boolean running;
-	PipedOutputStream out;
-	public EcouteThread(ServeurIHM sIHM, PipedOutputStream out){
+	public EcouteThread(ServeurIHM sIHM){
 		this.sIHM=sIHM;
-		this.out=out;
 		running = true;
 	}
 	public void terminate(){
 		running=false;
 	}
-	public void send(String message)throws Exception{
-		for(char c : message.toCharArray()){
-			out.write(c);
-		}
-		out.write('\0');
-	}
+
 	public void run(){
 		while(running){
 			try{
 				String buff =sIHM.read();
 				String parts[]= buff.split(";");
+				if(buff!=null)
 				switch(parts[0]){
 					case "CapteurPresent":
 						sIHM.addToList(parts);						
-					break;
+						break;
+					case "ValeurCapteur":
+						sIHM.changeVal(parts[1], Double.parseDouble(parts[2]));
+						break;
+					case "CapteurDeco":
+						//sIHM.
+						break;
 					default:
-						send(buff);
+						sIHM.updateBuffer(buff);
 				}
 			}catch(Exception e){
 				break;

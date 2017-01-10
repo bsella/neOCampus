@@ -201,14 +201,16 @@ public class Fenetre extends JFrame {
 			@Override
 			public void valueChanged(TreeSelectionEvent e) {
 				TreePath[] selected =capteurTree.getSelectionPaths();
-				List<Capteur> selectedCapteurs=new ArrayList<>();
-				for(TreePath node: selected){
-					List<Capteur>selectedCapteursInNode=ctm.getCapteurs(node);
-					for(Capteur c : selectedCapteursInNode)
-						if(!selectedCapteurs.contains(c))
-							selectedCapteurs.add(c);
+				if(selected!=null){
+					List<Capteur> selectedCapteurs=new ArrayList<>();
+					for(TreePath node: selected){
+						List<Capteur>selectedCapteursInNode=ctm.getCapteurs(node);
+						for(Capteur c : selectedCapteursInNode)
+							if(!selectedCapteurs.contains(c))
+								selectedCapteurs.add(c);
+					}
+					dm.show(selectedCapteurs);
 				}
-				dm.show(selectedCapteurs);
 			}
 		});
 		connectB.addActionListener(new ActionListener(){
@@ -234,7 +236,7 @@ public class Fenetre extends JFrame {
 					JOptionPane.showMessageDialog(new JFrame(), "Saisir un identifiant pour le capteur");
 				}
 				if(toutVaBien)try{
-					sIHM=new ServeurIHM(textIp.getText(),port,capteurListModel);
+					sIHM=new ServeurIHM(textIp.getText(),port,capteurListModel,dm);
 					toutVaBien=sIHM.envoyerConnexionIHM(textID.getText());
 					if(!toutVaBien)JOptionPane.showMessageDialog(new JFrame(), "Connexion refusée");
 				}catch(Exception ex){
@@ -279,7 +281,7 @@ public class Fenetre extends JFrame {
 			}
 		});
 		inscB.addActionListener(new ActionListener(){
-			public void actionPerformed(ActionEvent e) {
+			public void actionPerformed(ActionEvent e){
 				int ind[]=list.getSelectedIndices();
 				String[] capteurInscription= new String[ind.length];
 				for(int i=0; i<ind.length; i++){//obtenir les identifiants des capteurs selectionnés
@@ -300,7 +302,7 @@ public class Fenetre extends JFrame {
 							dm.add(ce);
 						}else{
 							TypeCapInter t= getTypeInter(parts[1]);
-							CapteurInterieur ci = new CapteurInterieur(parts[0], new Salle(new Etage(Integer.parseInt(parts[3]), new Batiment(parts[2], 1, 2)), parts[4]), parts[5], t);
+							CapteurInterieur ci = new CapteurInterieur(parts[0], new Salle(new Etage(Etage.toInt(parts[3]), new Batiment(parts[2], 1, 2)), parts[4]), parts[5], t);
 							ctm.add(ci);
 							dm.add(ci);
 						}

@@ -98,6 +98,6 @@ public class CapteurInterieur extends Capteur{
 		return c;
 	}
 	public String toString(){
-		return getID()+" "+ getBatiment().toString()+", "+ getEtage().toString()+", salle :"+salle.toString()+", "+position;
+		return getID()+" "+ getBatiment().toString()+", "+ getEtage().toString()+", salle:"+salle.toString()+", "+position;
 	}
 }

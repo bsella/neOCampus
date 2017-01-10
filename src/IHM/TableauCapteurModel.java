@@ -68,7 +68,7 @@ public class TableauCapteurModel extends AbstractTableModel{
 			case 0: return "ID";
 			case 1: return "Type";
 			case 2: return "Emplacement";
-			case 6: return "Donnée";
+			case 3: return "Donnée";
 		}
 		return null;
 	}
@@ -84,14 +84,18 @@ public class TableauCapteurModel extends AbstractTableModel{
 			data.remove(capListAll.indexOf(c));
 			capListAll.remove(c);
 		}
-		if(c instanceof CapteurInterieur){
+		if(c instanceof CapteurInterieur)
 			capListInt.remove(c);
-			fireTableDataChanged();
-		}
-		if(c instanceof CapteurExterieur){
+		else
 			capListExt.remove(c);
-			fireTableDataChanged();
+		fireTableDataChanged();
+	}
+	public Capteur stringToCapteur(String id){
+		for(Capteur c : capListAll){
+			if(c.getID().equals(id))
+				return c;
 		}
+		return null;
 	}
 	public void changeVal(Capteur c, double val){
 		if(contains(c)){

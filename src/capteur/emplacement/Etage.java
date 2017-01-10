@@ -23,6 +23,12 @@ public class Etage {
 		if(etage==1) return "1er étage";
 		return Integer.toString(etage)+ "eme étage";
 	}
+	public static int toInt(String s){
+		if(s.equals("1er étage")) return 1;
+		if(s.equals("RDC")) return 0;
+		if(s.contains("eme")) return Integer.parseInt(s.split("eme")[0]);
+		return Integer.parseInt(s.split(" ")[1]);
+	}
 	public void addSalle(Salle s){
 		salles.add(s);
 	}
