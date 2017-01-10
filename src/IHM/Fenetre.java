@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -26,15 +28,20 @@ import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
-import capteur.Batiment;
+import capteur.Capteur;
 import capteur.CapteurExterieur;
-import capteur.CapteurInterieur;
-import capteur.Emplacement;
 import capteur.GPSCoord;
 import capteur.TypeCapExter;
 import capteur.TypeCapInter;
+import capteur.emplacement.Batiment;
+import capteur.emplacement.CapteurInterieur;
+import capteur.emplacement.Etage;
+import capteur.emplacement.Salle;
 
 public class Fenetre extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -126,25 +133,31 @@ public class Fenetre extends JFrame {
 		JButton deconnectB = new JButton("Déconnexion");
 		
 		JPanel dataTable= new JPanel(new GridLayout(2, 1));
-		TableauCapteurIntModel dm= new TableauCapteurIntModel();
+		TableauCapteurModel dm= new TableauCapteurModel();
 		JTable t = new JTable(dm);
-		dm.add(new CapteurInterieur("test1", new Emplacement(new Batiment("U3", 12, 21), 2, "103", "testt"), TypeCapInter.EAU_CHAUDE));
-		
+		CapteurInterieur test1= new CapteurInterieur("test1" , new Salle(new Etage(2, new Batiment("U3", 0, 1)), "103"), "testt", TypeCapInter.EAU_CHAUDE);
+		CapteurInterieur test2= new CapteurInterieur("test2" , new Salle(new Etage(2, new Batiment("U3", 0, 1)), "103"), "test", TypeCapInter.EAU_CHAUDE);
+		CapteurInterieur test3= new CapteurInterieur("test3" , new Salle(new Etage(1, new Batiment("U2", 0, 1)), "104"), "test", TypeCapInter.EAU_CHAUDE);
+		CapteurInterieur test4= new CapteurInterieur("test4" , new Salle(new Etage(2, new Batiment("U2", 0, 1)), "104"), "test", TypeCapInter.EAU_CHAUDE);
 		dataTable.add(t);
 		
 		DefaultListModel<String> capteurListModel= new DefaultListModel<>();
 		JList<String> list=new JList<>(capteurListModel);
 		JScrollPane listScroll=new JScrollPane(list);
 		listScroll.setPreferredSize(new Dimension(600,100));
-		//data.add(listScroll);
 		
 		DefaultMutableTreeNode root =new DefaultMutableTreeNode("Capteurs");
 		CapteurTreeModel ctm= new CapteurTreeModel(root);
 		JTree capteurTree=new JTree(ctm);
-		ctm.add(new CapteurInterieur("test1", new Emplacement(new Batiment("U3", 12, 21), 2, "103", "testt"), TypeCapInter.EAU_CHAUDE));	
-		ctm.add(new CapteurInterieur("test2", new Emplacement(new Batiment("U3", 12, 21), 2, "104", "test"), TypeCapInter.EAU_CHAUDE));	
-		ctm.add(new CapteurInterieur("test3", new Emplacement(new Batiment("U2", 12, 21), 1, "104", "test"), TypeCapInter.EAU_CHAUDE));	
-		ctm.add(new CapteurInterieur("test4", new Emplacement(new Batiment("U2", 12, 21), 2, "104", "test"), TypeCapInter.EAU_CHAUDE));	
+		ctm.add(test1);
+		ctm.add(test2);
+		ctm.add(test3);
+		ctm.add(test4);
+		dm.add(test1);
+		dm.add(test2);
+		dm.add(test3);
+		dm.add(test4);
+		
 		lblID.setBounds(130, 123, 150, 16);
 		textID.setBounds(280, 120, 150, 26);
 		lblIp.setBounds(130, 183, 150, 16);
@@ -184,6 +197,20 @@ public class Fenetre extends JFrame {
 		gbl.setConstraints(inscB, c);
 		data.add(inscB);
 		
+		capteurTree.addTreeSelectionListener(new TreeSelectionListener() {
+			@Override
+			public void valueChanged(TreeSelectionEvent e) {
+				TreePath[] selected =capteurTree.getSelectionPaths();
+				List<Capteur> selectedCapteurs=new ArrayList<>();
+				for(TreePath node: selected){
+					List<Capteur>selectedCapteursInNode=ctm.getCapteurs(node);
+					for(Capteur c : selectedCapteursInNode)
+						if(!selectedCapteurs.contains(c))
+							selectedCapteurs.add(c);
+				}
+				dm.show(selectedCapteurs);
+			}
+		});
 		connectB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				boolean toutVaBien=true;
@@ -227,7 +254,6 @@ public class Fenetre extends JFrame {
 				}
 			}
 		});
-		capteurListModel.addElement("test");
 		deconnectB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				try{
@@ -246,14 +272,12 @@ public class Fenetre extends JFrame {
 				}
 			}
 		});
-		
 		list.addListSelectionListener(new ListSelectionListener(){
 			public void valueChanged(ListSelectionEvent e) {
 				if(!list.isSelectionEmpty())
 					inscB.setEnabled(true);
 			}
 		});
-		
 		inscB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e) {
 				int ind[]=list.getSelectedIndices();
@@ -271,11 +295,12 @@ public class Fenetre extends JFrame {
 						if(parts.length==4){
 							GPSCoord gps= new GPSCoord(Double.parseDouble(parts[2]),Double.parseDouble(parts[3]));
 							TypeCapExter t= getTypeExter(parts[1]);
-							ctm.add(new CapteurExterieur(parts[0], gps, t));
+							CapteurExterieur ce= new CapteurExterieur(parts[0], gps, t);
+							ctm.add(ce);
+							dm.add(ce);
 						}else{
-							Emplacement emp=new Emplacement(new Batiment(parts[2],0,0), Integer.parseInt(parts[3]), parts[4], parts[5]);
 							TypeCapInter t= getTypeInter(parts[1]);
-							CapteurInterieur ci = new CapteurInterieur(parts[0], emp, t);
+							CapteurInterieur ci = new CapteurInterieur(parts[0], new Salle(new Etage(Integer.parseInt(parts[3]), new Batiment(parts[2], 1, 2)), parts[4]), parts[5], t);
 							ctm.add(ci);
 							dm.add(ci);
 						}

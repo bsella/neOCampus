@@ -1,12 +1,33 @@
 package capteur;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.EventQueue;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
-import javax.swing.*;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
+import capteur.emplacement.Batiment;
+import capteur.emplacement.CapteurInterieur;
+import capteur.emplacement.Etage;
+import capteur.emplacement.Salle;
 
 public class Fenetre extends JFrame {
 
@@ -238,7 +259,7 @@ public class Fenetre extends JFrame {
 						}
 					}else{
 						try{
-							CapteurInterieur ci= new CapteurInterieur(textID.getText(), null, getTypeInter((String)mesureBox.getSelectedItem()));
+							CapteurInterieur ci= new CapteurInterieur(textID.getText(), null, "", getTypeInter((String)mesureBox.getSelectedItem()));
 							sc.envoyerValeurCapteur(ci.simule());
 						}catch (Exception e1){
 							JOptionPane.showMessageDialog(new JFrame(), "Erreur : serveur non connecte");
@@ -310,7 +331,7 @@ public class Fenetre extends JFrame {
 		
 		capteur.add(mesureBox);
 		
-		GestionFichierPositionExterieur g= new GestionFichierPositionExterieur("/Users/karim/Documents/workspace/neOCampus/src/capteur/format_bat");
+		GestionFichierPositionExterieur g= new GestionFichierPositionExterieur("./src/capteur/format_bat");
 		String[] bats=g.listeBatiment();
 		String[] etages = g.listeEtageFromBatiment(bats[0]);
 		String[] salles=g.listeSalleFromEtageAndBatiment(bats[0],etages[0]);
@@ -383,8 +404,8 @@ public class Fenetre extends JFrame {
 						CapteurExterieur ce= new CapteurExterieur(textID.getText(), gps, t);
 						sc=new ServeurCapteur(textIp.getText(),port);
 						toutVaBien=sc.envoyerConnexionCapteur(ce);	
-						pb.setMaximum(ce.getFrequence()*25);
-						frequence=ce.getFrequence();
+						pb.setMaximum(ce.getFrec()*25);
+						frequence=ce.getFrec();
 					}
 					catch(Exception e1){
 						toutVaBien=false;
@@ -399,18 +420,15 @@ public class Fenetre extends JFrame {
 						toutVaBien=false;
 						JOptionPane.showMessageDialog(new JFrame(), "Etage : Saisir un entier");
 					}
-					if(toutVaBien){
-						Batiment bat=new Batiment((String)batiBox.getSelectedItem(), 0, 0);
-						try{
-							CapteurInterieur ci=new CapteurInterieur(textID.getText(),new Emplacement(bat, etage, (String)salleBox.getSelectedItem(),textPos.getText()),t);
-							sc=new ServeurCapteur(textIp.getText(),port);
-							toutVaBien=sc.envoyerConnexionCapteur(ci);
-							pb.setMaximum(ci.getFrequence()*25);
-							frequence=ci.getFrequence();
-						}catch(Exception ex){
-							toutVaBien=false;
-							JOptionPane.showMessageDialog(new JFrame(), "Erreur de connexion au serveur");
-						}
+					if(toutVaBien)try{
+						CapteurInterieur ci=new CapteurInterieur(textID.getText(),new Salle(new Etage(etage,new Batiment((String)batiBox.getSelectedItem(), 0, 0)),(String)salleBox.getSelectedItem()),textPos.getText(),t);
+						sc=new ServeurCapteur(textIp.getText(),port);
+						toutVaBien=sc.envoyerConnexionCapteur(ci);
+						pb.setMaximum(ci.getFrec()*25);
+						frequence=ci.getFrec();
+					}catch(Exception ex){
+						toutVaBien=false;
+						JOptionPane.showMessageDialog(new JFrame(), "Erreur de connexion au serveur");
 					}
 				}
 				if(toutVaBien){
@@ -449,7 +467,7 @@ public class Fenetre extends JFrame {
 					}
 				}else{
 					try {
-						CapteurInterieur ci=new CapteurInterieur(textID.getText(), null, null);
+						CapteurInterieur ci=new CapteurInterieur(textID.getText(), null, "", null);
 						if(sc.deconnecterCapteur(ci.getID())){
 							connectB.setEnabled(true);
 							deconnectB.setEnabled(false);

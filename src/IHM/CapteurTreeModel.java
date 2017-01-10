@@ -1,113 +1,23 @@
 package IHM;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
-import capteur.Batiment;
+import capteur.Capteur;
 import capteur.CapteurExterieur;
-import capteur.CapteurInterieur;
-import capteur.TypeCapInter;
-
+import capteur.emplacement.Batiment;
+import capteur.emplacement.CapteurInterieur;
+import capteur.emplacement.Etage;
+import capteur.emplacement.Salle;
 
 public class CapteurTreeModel extends DefaultTreeModel{
-	
-	class Etage{
-		int etage;
-		Batiment bat;
-		List<Salle> salles= new ArrayList<>();
-		Etage(int e, Batiment b){
-			etage=e;
-			bat=b;
-		}
-		int get(){
-			return etage;
-		}
-		Batiment getBatiment(){
-			return bat;
-		}
-		public String toString(){
-			if(etage<0) return "étage "+etage;
-			if(etage==0) return "RDC";
-			if(etage==1) return "1er étage";
-			return Integer.toString(etage)+ "eme étage";
-		}
-		void addSalle(Salle s){
-			salles.add(s);
-		}
-		void removeSalle(Salle s){
-			salles.remove(s);
-		}
-		boolean listVide(){
-			return salles.isEmpty();
-		}
-		List<Salle> getSalles(){
-			return salles;
-		}
-	}
-	class Salle{
-		String salle;
-		Etage etage;
-		List<Capteur> capteurs= new ArrayList<>();
-		Salle(Etage e, String s){
-			salle=s;
-			etage=e;
-		}
-		String get(){
-			return salle;
-		}
-		Etage getEtage(){
-			return etage;
-		}
-		public String toString(){
-			return salle;
-		}
-		void addCapteur(Capteur c){
-			capteurs.add(c);
-		}
-		void removeCapteur(Capteur c){
-			capteurs.remove(c);
-		}
-		boolean listVide(){
-			return capteurs.isEmpty();
-		}
-		List<Capteur> getCapteurs(){
-			return capteurs;
-		}
-	}
-	class Capteur{
-		String ID;
-		String position;
-		Salle salle;
-		TypeCapInter type;
-		Capteur(String id, String p,Salle s, TypeCapInter t){
-			ID=id;
-			position=p;
-			salle=s;
-			type= t;
-		}
-		String get(){
-			return ID;
-		}
-		String getPos(){
-			return position;
-		}
-		Salle getSalle(){
-			return salle;
-		}
-		public String toString(){
-			return ID+"("+position+")";
-		}
-	}
 	private static final long serialVersionUID = 1L;
 	List<Batiment> batiments= new ArrayList<>();
-	Map<Batiment, List<Etage>> batimentEtage= new HashMap<>();
-	List<String> capExt = new ArrayList<>();
+	List<CapteurExterieur> capExt = new ArrayList<>();
 	
 	public CapteurTreeModel(TreeNode root) {
 		super(root);
@@ -116,61 +26,68 @@ public class CapteurTreeModel extends DefaultTreeModel{
 	public Object getRoot(){
 		return "Capteurs";
 	}
-	<T> T getSame(T t, List<T> list){
+	private <T> T getSame(T t, List<T> list){
 		for(T tt : list){
-			if(tt.toString().equals(t.toString()))
+			if(tt.equals(t))
 				return tt;
 		}
 		return t;
 	}
-	public void add(CapteurInterieur ci){
-		Batiment b = ci.getEmplacement().getBatiment();
-		Etage e= new Etage(ci.getEmplacement().getEtage(),b);
-		Salle s= new Salle(e, ci.getEmplacement().getSalle());
-		b=getSame(b,batiments);
-		if(!batiments.contains(b)){
-			e= new Etage(ci.getEmplacement().getEtage(),b);
-			s= new Salle(e, ci.getEmplacement().getSalle());
-			List<Etage> eList= new ArrayList<>();
-			eList.add(e);
-			batiments.add(b);
-			batimentEtage.put(b, eList);
-			e.addSalle(s);
-		}else{
-			e=getSame(e, batimentEtage.get(b));
-			if(!batimentEtage.get(b).contains(e)){
-				List<Etage> eList= batimentEtage.get(b);
-				eList.add(e);
-				batimentEtage.put(b, eList);
+	public void add(Capteur c){
+		if(c instanceof CapteurInterieur){
+			CapteurInterieur ci= (CapteurInterieur)c;
+			Batiment b =getSame(ci.getBatiment(),batiments);
+			Etage e;
+			Salle s;
+			if(!batiments.contains(b)){
+				batiments.add(b);
+				e=ci.getEtage();
+				b.addEtage(e);
+				s= ci.getSalle();
 				e.addSalle(s);
 			}else{
-				s=getSame(s, e.getSalles());
-				if(!e.getSalles().contains(s))
+				e=getSame(ci.getEtage(),b.getEtages());
+				if(!b.getEtages().contains(e)){
+					b.addEtage(e);
+					s= ci.getSalle();
 					e.addSalle(s);
-			}
-		}
-		s.addCapteur(new Capteur(ci.getID(),ci.getEmplacement().getDescriptif(),s,ci.getType()));
-	}
-	public void remove(CapteurInterieur ci){
-		Batiment b = ci.getEmplacement().getBatiment();
-		Etage e= new Etage(ci.getEmplacement().getEtage(),b);
-		Salle s= new Salle(e, ci.getEmplacement().getSalle());
-		Capteur c= new Capteur(ci.getID(),ci.getEmplacement().getDescriptif(),s,ci.getType());
-		s.removeCapteur(c);
-		if(s.listVide()){
-			e.removeSalle(s);
-			if(e.listVide()){
-				batimentEtage.remove(e);
-				if(batimentEtage.isEmpty()){
-					batiments.remove(b);
+				}else{
+					s=getSame(ci.getSalle(),e.getSalles());
+					if(!e.getSalles().contains(s))
+						e.addSalle(s);
 				}
 			}
+			s.addCapteur(ci);
+		}else{
+			CapteurExterieur ce=(CapteurExterieur)c;
+			ce= getSame(ce, capExt);		
+			if(!capExt.contains(ce)){
+				capExt.add(ce);
+			}
 		}
 	}
-	public void add(CapteurExterieur ce){
-		if(!capExt.contains(ce)){
-			capExt.add(ce.toString());
-			Collections.sort(capExt);
+	public void remove(Capteur c){
+		if(c instanceof CapteurInterieur){
+			CapteurInterieur ci= (CapteurInterieur)c;
+			Batiment b = getSame(ci.getBatiment(),batiments);
+			Etage e= getSame(ci.getEtage(), b.getEtages());
+			Salle s= getSame(ci.getSalle(), e.getSalles());
+			s.removeCapteur(ci);
+			if(s.listVide()){
+				e.removeSalle(s);
+				if(e.listVide()){
+					b.removeEtage(e);
+					if(b.getEtages().isEmpty()){
+						batiments.remove(b);
+					}
+				}
+			}
+		}else{			
+			CapteurExterieur ce=(CapteurExterieur)c;
+			ce= getSame(ce, capExt);
+			if(capExt.contains(ce)){
+				capExt.remove(ce);
+			}
 		}
 	}
 
@@ -193,9 +110,9 @@ public class CapteurTreeModel extends DefaultTreeModel{
 					return capExt.get(index);
 			}
 		if(parent instanceof Batiment){
-			if(index>=batimentEtage.get(parent).size())
+			if(index>=((Batiment)parent).getEtages().size())
 				return null;
-			return batimentEtage.get(parent).get(index);
+			return ((Batiment)parent).getEtages().get(index);
 		}
 		if(parent instanceof Etage){
 			if(index>=((Etage)parent).getSalles().size())
@@ -218,15 +135,34 @@ public class CapteurTreeModel extends DefaultTreeModel{
 				case "Exterieurs": return capExt.size();
 			}
 		if(parent instanceof Batiment)
-			return batimentEtage.get(parent)==null?0:batimentEtage.get(parent).size();
+			return ((Batiment)parent).getEtages()==null?0:((Batiment) parent).getEtages().size();
 		if(parent instanceof Etage)
 			return ((Etage)parent).getSalles().size();
 		if(parent instanceof Salle)
 			return ((Salle)parent).getCapteurs().size();
 		return 0;
 	}
-	public boolean isLeaf(Object node) {
+	public boolean isLeaf(Object node){
+		if(node instanceof String){
+			if(node.equals("Interierus")||node.equals("Exterieurs"))
+				return false;
+		}
 		return getChildCount(node)==0;
     }
-
+	public List<Capteur> getCapteurs(TreePath node){
+		if(node.getPathCount()==0)return null;
+		List<Capteur> list= new ArrayList<>();
+		if(isLeaf(node.getPathComponent(node.getPathCount()-1))){
+			list.add((Capteur)node.getLastPathComponent());
+			return list;
+		}
+		Object o= node.getPathComponent(node.getPathCount()-1);
+		for(int i=0; i<getChildCount(o); i++){
+			List<Capteur> aux= getCapteurs(node.pathByAddingChild(getChild(o,i)));
+			for(int j=0;j<aux.size();j++)
+				if(!list.contains(aux.get(j)))
+					list.add(aux.get(j));
+		}
+		return list;
+	}
 }

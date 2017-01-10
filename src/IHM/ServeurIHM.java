@@ -8,15 +8,13 @@ import java.util.Scanner;
 
 import javax.swing.DefaultListModel;
 
-import capteur.CapteurExterieur;
-import capteur.CapteurInterieur;
+import capteur.Capteur;
 
 public class ServeurIHM{
 	private Socket sock;
 	PipedOutputStream out= new PipedOutputStream();
 	PipedInputStream in= new PipedInputStream(out);
-	private TableauCapteurIntModel tcim;
-	private TableauCapteurExtModel tcem;
+	private TableauCapteurModel tcm;
 	DefaultListModel<String> lm;
 	private EcouteThread et= new EcouteThread(this,out);
 	public ServeurIHM(String adr, int port, DefaultListModel<String> lm) throws Exception{
@@ -115,17 +113,10 @@ public class ServeurIHM{
 			buff=buff+";"+parts[i];
 		lm.addElement(buff);
 	}
-	public void addToTable(CapteurInterieur ci){
-		tcim.add(ci);
+	public void addToTable(Capteur c){
+		tcm.add(c);
 	}
-	public void addToTable(CapteurExterieur ce){
-		tcem.add(ce);
+	public void changeVal(Capteur c, double val){
+		tcm.changeVal(c, val);
 	}
-	public void changeVal(CapteurInterieur ci, double val){
-		tcim.changeVal(ci, val);
-	}
-	public void changeVal(CapteurExterieur ce, double val){
-		tcem.changeVal(ce,val);
-	}
-	
 }
