@@ -40,7 +40,7 @@ import capteur.emplacement.CapteurInterieur;
 import capteur.emplacement.Etage;
 import capteur.emplacement.Salle;
 // Sert a rien
-public class IHM extends JFrame {
+public class InterfaceVisu extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private ServeurIHM sIHM;
 	boolean connected=false;
@@ -69,7 +69,7 @@ public class IHM extends JFrame {
 		return -1;
 	}
 	
-	public IHM(){
+	public InterfaceVisu(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 600, 600);
 		JPanel contentPane = new JPanel();
@@ -96,12 +96,12 @@ public class IHM extends JFrame {
 		
 		TableauCapteurModel dm= new TableauCapteurModel();
 		JTable t = new JTable(dm);
-		t.setDefaultRenderer(Object.class, new JTableRender());
+		t.setDefaultRenderer(Object.class, new TableRender());
+		JScrollPane dataTable= new JScrollPane(t);
 		CapteurInterieur test1= new CapteurInterieur("test1" , new Salle(new Etage(2, new Batiment("U3", 0, 1)), "103"), "testt", TypeCapInter.EAU_CHAUDE);
 		CapteurInterieur test2= new CapteurInterieur("test2" , new Salle(new Etage(2, new Batiment("U3", 0, 1)), "103"), "test", TypeCapInter.EAU_CHAUDE);
 		CapteurInterieur test3= new CapteurInterieur("test3" , new Salle(new Etage(1, new Batiment("U2", 0, 1)), "104"), "test", TypeCapInter.EAU_CHAUDE);
 		CapteurInterieur test4= new CapteurInterieur("test4" , new Salle(new Etage(2, new Batiment("U2", 0, 1)), "104"), "test", TypeCapInter.EAU_CHAUDE);
-		JScrollPane dataTable= new JScrollPane(t);
 		
 		DefaultListModel<Capteur> capteurListModel= new DefaultListModel<>();
 		JList<Capteur> list=new JList<>(capteurListModel);
@@ -285,7 +285,7 @@ public class IHM extends JFrame {
 	public static void main(String[] args){
 		EventQueue.invokeLater(new Runnable() {
 			public void run(){
-				IHM frame = new IHM();
+				InterfaceVisu frame = new InterfaceVisu();
 				frame.setVisible(true);
 				frame.setLocationRelativeTo(null);
 			}
