@@ -1,11 +1,11 @@
 package capteur;
 
 public class GPSCoord {
-	private double longitude;
 	private double latitude;
-	public GPSCoord(double lo, double la){
-		this.longitude=lo;
+	private double longitude;
+	public GPSCoord(double la, double lo){
 		this.latitude=la;
+		this.longitude=lo;
 	}
 	public double getLongitude(){
 		return longitude;
