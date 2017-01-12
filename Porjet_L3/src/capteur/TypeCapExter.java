@@ -1,9 +1,0 @@
-package capteur;
-
-public enum TypeCapExter {
-	TEMPERATURE,
-	HUMIDITE,
-	LUMINOSITE,
-	VITESSE_VENT,
-	PRESSION_ATMOSPHERIQUE
-}

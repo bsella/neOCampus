@@ -5,12 +5,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class CapteurExterieur extends Capteur {
-	private GPSCoord gps;
+	private GPSCoord emplacement;
 	private TypeCapExter type;
 
 	public CapteurExterieur(String ID,GPSCoord gps, TypeCapExter t){
 		super(ID);
-		this.gps=gps;
+		emplacement=gps;
 		type=t;
 		if(t!=null)switch(t){
 			case HUMIDITE:
@@ -59,13 +59,13 @@ public class CapteurExterieur extends Capteur {
 		return this.type;
 	}
 	public GPSCoord getGPS(){
-		return this.gps;
+		return this.emplacement;
 	}
 	
 	public int compareTo(CapteurExterieur c){
-		return this.gps.compareTo(c.gps);
+		return this.emplacement.compareTo(c.emplacement);
 	}
 	public String toString(){
-		return getID()+"("+this.gps.toString()+")";
+		return this.emplacement.toString()+" "+ this.getID();
 	}
 }

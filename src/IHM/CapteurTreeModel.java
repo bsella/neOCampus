@@ -27,9 +27,10 @@ public class CapteurTreeModel extends DefaultTreeModel{
 		return "Capteurs";
 	}
 	private <T> T getSame(T t, List<T> list){
-		for(T tt : list)
+		for(T tt : list){
 			if(tt.equals(t))
 				return tt;
+		}
 		return t;
 	}
 	public void add(Capteur c){
@@ -60,44 +61,34 @@ public class CapteurTreeModel extends DefaultTreeModel{
 		}else{
 			CapteurExterieur ce=(CapteurExterieur)c;
 			ce= getSame(ce, capExt);		
-			if(!capExt.contains(ce))
+			if(!capExt.contains(ce)){
 				capExt.add(ce);
+			}
 		}
 	}
-	private Capteur stringToCap(String id){
-		for(Capteur cap:capExt)
-			if(cap.getID().equals(id))
-				return cap;
-		for(Batiment b: batiments)
-			for(Etage e: b.getEtages())
-				for(Salle s: e.getSalles())
-					for(CapteurInterieur cap:s.getCapteurs())
-						if(cap.getID().equals(id))
-							return cap;
-		return null;
-	}
-	public void remove(String id){
-		Capteur c=stringToCap(id);
-		if(c!=null)
-		if(c instanceof CapteurExterieur)
-			capExt.remove((CapteurExterieur)c);
-		else{
-			CapteurInterieur cap= (CapteurInterieur)c;
-			Batiment b= getSame(cap.getBatiment(), batiments);
-			Etage e= getSame(cap.getEtage(), b.getEtages());
-			Salle s= getSame(cap.getSalle(),e.getSalles());
-			s.removeCapteur(cap);
+	public void remove(Capteur c){
+		if(c instanceof CapteurInterieur){
+			CapteurInterieur ci= (CapteurInterieur)c;
+			Batiment b = getSame(ci.getBatiment(),batiments);
+			Etage e= getSame(ci.getEtage(), b.getEtages());
+			Salle s= getSame(ci.getSalle(), e.getSalles());
+			s.removeCapteur(ci);
 			if(s.listVide()){
 				e.removeSalle(s);
 				if(e.listVide()){
 					b.removeEtage(e);
-					if(b.listVide())
+					if(b.getEtages().isEmpty()){
 						batiments.remove(b);
+					}
 				}
 			}
+		}else{			
+			CapteurExterieur ce=(CapteurExterieur)c;
+			ce= getSame(ce, capExt);
+			if(capExt.contains(ce)){
+				capExt.remove(ce);
+			}
 		}
-		//Object[] children={c};
-		//fireTreeNodesRemoved(this, new TreePath(c).getParentPath(), , children);
 	}
 
 	public Object getChild(Object parent, int index) {
@@ -153,7 +144,7 @@ public class CapteurTreeModel extends DefaultTreeModel{
 	}
 	public boolean isLeaf(Object node){
 		if(node instanceof String){
-			if(node.equals("Interieurs")||node.equals("Exterieurs"))
+			if(node.equals("Interierus")||node.equals("Exterieurs"))
 				return false;
 		}
 		return getChildCount(node)==0;
@@ -161,11 +152,11 @@ public class CapteurTreeModel extends DefaultTreeModel{
 	public List<Capteur> getCapteurs(TreePath node){
 		List<Capteur> list= new ArrayList<>();
 		if(node.getPathCount()==0)return list;
-		if(isLeaf(node.getLastPathComponent())){
+		if(isLeaf(node.getPathComponent(node.getPathCount()-1))){
 			list.add((Capteur)node.getLastPathComponent());
 			return list;
 		}
-		Object o= node.getLastPathComponent();
+		Object o= node.getPathComponent(node.getPathCount()-1);
 		for(int i=0; i<getChildCount(o); i++){
 			List<Capteur> aux= getCapteurs(node.pathByAddingChild(getChild(o,i)));
 			for(int j=0;j<aux.size();j++)
