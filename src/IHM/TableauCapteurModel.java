@@ -18,7 +18,7 @@ public class TableauCapteurModel extends AbstractTableModel{
 	List<CapteurInterieur> capListInt= new ArrayList<>();
 	List<CapteurExterieur> capListExt= new ArrayList<>();
 	
-	boolean contains(Capteur cap){
+	private boolean contains(Capteur cap){
 		for(Capteur c : capListAll){
 			if(c.equals(cap))
 				return true;
@@ -79,15 +79,16 @@ public class TableauCapteurModel extends AbstractTableModel{
 			data.add(null);
 		}
 	}
-	public void remove(Capteur c){
-		if(contains(c)){
+	public void remove(String id){
+		Capteur c= stringToCapteur(id);
+		if(c!=null){
 			data.remove(capListAll.indexOf(c));
-			capListAll.remove(c);
+			capListAll.remove(c);			
+			if(c instanceof CapteurInterieur)
+				capListInt.remove(c);
+			else
+				capListExt.remove(c);
 		}
-		if(c instanceof CapteurInterieur)
-			capListInt.remove(c);
-		else
-			capListExt.remove(c);
 		fireTableDataChanged();
 	}
 	public Capteur stringToCapteur(String id){
