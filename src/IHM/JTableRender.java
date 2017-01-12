@@ -15,17 +15,17 @@ public class JTableRender extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         /**
-         * Colorier les cellules en orange si le montant est inferieur au montant voulu
+         * Colorie les cellules en orange si le montant est inferieur au montant voulu
          */
         Object o = table.getValueAt(row, 3);
         if (o != null && component instanceof JLabel) {
             JLabel label = (JLabel) component;
-            System.out.println(label.getText());
+            //System.out.println(label.getText());
             double valeur = -10000;
             try {
             	valeur = Double.parseDouble(label.getText());
+            	// Valeur a changer avec pop-up et boutton Alerte
             	if (valeur < 500) {
-                	
                     Color clr = new Color(255, 226, 198);
                     component.setBackground(clr);
                     System.out.println("valeur" + valeur);

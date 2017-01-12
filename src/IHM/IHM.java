@@ -34,16 +34,13 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import capteur.Capteur;
-import capteur.CapteurExterieur;
-import capteur.GPSCoord;
-import capteur.TypeCapExter;
 import capteur.TypeCapInter;
 import capteur.emplacement.Batiment;
 import capteur.emplacement.CapteurInterieur;
 import capteur.emplacement.Etage;
 import capteur.emplacement.Salle;
-
-public class Fenetre extends JFrame {
+// Sert a rien
+public class IHM extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private ServeurIHM sIHM;
 	boolean connected=false;
@@ -64,41 +61,6 @@ public class Fenetre extends JFrame {
 	    }
 	}
 	
-	private TypeCapExter getTypeExter(String t){
-		switch(t){
-			case "PRESSION":
-				return TypeCapExter.PRESSION_ATMOSPHERIQUE;
-			case "VITESSE_VENT":
-				return TypeCapExter.VITESSE_VENT;
-			case "TEMPERATURE":
-				return TypeCapExter.TEMPERATURE;
-			case "HUMIDITE":
-				return TypeCapExter.HUMIDITE;
-			case "LUMINOSITE":
-				return TypeCapExter.LUMINOSITE;
-			default: return null;
-		}
-	}
-	private TypeCapInter getTypeInter(String t){
-		switch(t){
-			case "TEMPERATURE":
-				return TypeCapInter.TEMPERATURE;
-			case "HUMIDITE":
-				return TypeCapInter.HUMIDITE;
-			case "LUMINOSITE":
-				return TypeCapInter.LUMINOSITE;
-			case "VOLUME_SONORE":
-				return TypeCapInter.VOLUME_SONORE;
-			case "EAU_FROIDE":
-				return TypeCapInter.EAU_FROIDE;
-			case "EAU_CHAUDE":
-				return TypeCapInter.EAU_CHAUDE;
-			case "CONSOMMATION_ECLAIRAGE":
-				return TypeCapInter.CONSOMMATION_ECLAIRAGE;
-			default: return null;
-		}
-	}
-	
 	int getIndex(String[] ss, String s){
 		for(int i=0; i<ss.length; i++){
 			if(ss[i].equals(s))
@@ -107,7 +69,7 @@ public class Fenetre extends JFrame {
 		return -1;
 	}
 	
-	public Fenetre(){
+	public IHM(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 600, 600);
 		JPanel contentPane = new JPanel();
@@ -119,8 +81,8 @@ public class Fenetre extends JFrame {
 		Container data = new Container();
 		tp.addTab("Connexion", connexion);
 		tp.addTab("Data", data);
-		GridBagLayout gridbl = new GridBagLayout();
-		data.setLayout(gridbl);
+		GridBagLayout gbl = new GridBagLayout();
+		data.setLayout(gbl);
 		connexion.setLayout(null);
 		
 		JLabel lblID = new JLabel("Identifiant :");
@@ -141,8 +103,8 @@ public class Fenetre extends JFrame {
 		CapteurInterieur test4= new CapteurInterieur("test4" , new Salle(new Etage(2, new Batiment("U2", 0, 1)), "104"), "test", TypeCapInter.EAU_CHAUDE);
 		JScrollPane dataTable= new JScrollPane(t);
 		
-		DefaultListModel<String> capteurListModel= new DefaultListModel<>();
-		JList<String> list=new JList<>(capteurListModel);
+		DefaultListModel<Capteur> capteurListModel= new DefaultListModel<>();
+		JList<Capteur> list=new JList<>(capteurListModel);
 		JScrollPane listScroll=new JScrollPane(list);
 		listScroll.setPreferredSize(new Dimension(600,100));
 		
@@ -153,6 +115,10 @@ public class Fenetre extends JFrame {
 		ctm.add(test2);
 		ctm.add(test3);
 		ctm.add(test4);
+		ctm.remove("test4");
+		ctm.remove("test3");
+		//ctm.remove("test1");
+		//ctm.remove("test2");
 		dm.add(test1);
 		dm.add(test2);
 		dm.add(test3);
@@ -177,52 +143,53 @@ public class Fenetre extends JFrame {
 		connexion.add(connectB);
 		connexion.add(deconnectB);
 		JScrollPane scrollTree= new JScrollPane(capteurTree);
-		GridBagConstraints constraint= new GridBagConstraints();
-		constraint.weightx=5;
-		constraint.weighty=5;
-		constraint.fill=GridBagConstraints.BOTH;
-		gridbl.setConstraints(dataTable, constraint);
+		GridBagConstraints c= new GridBagConstraints();
+		c.weightx=5;
+		c.weighty=5;
+		c.fill=GridBagConstraints.BOTH;
+		gbl.setConstraints(dataTable, c);
 		data.add(dataTable);
-		constraint.weightx=1;
-		gridbl.setConstraints(scrollTree, constraint);
+		c.weightx=1;
+		gbl.setConstraints(scrollTree, c);
 		data.add(scrollTree);
-		constraint.gridy=1;
-		constraint.weightx=5;
-		constraint.weighty=1;
-		gridbl.setConstraints(listScroll, constraint);
+		c.gridy=1;
+		c.weightx=5;
+		c.weighty=1;
+		gbl.setConstraints(listScroll, c);
 		data.add(listScroll);
 		JButton inscB= new JButton("S'inscrire");
 		inscB.setEnabled(false);
-		constraint.fill=GridBagConstraints.HORIZONTAL;
-		constraint.weightx=1;
-		constraint.weighty=1;
-		constraint.insets.top=30;
-		constraint.insets.bottom=0;
-		gridbl.setConstraints(inscB, constraint);
+		c.fill=GridBagConstraints.HORIZONTAL;
+		c.weightx=1;
+		c.weighty=1;
+		c.insets.top=30;
+		c.insets.bottom=0;
+		gbl.setConstraints(inscB, c);
 		data.add(inscB);
 		JButton bAlerte= new JButton("Alerte");
 		bAlerte.setEnabled(false);
-		constraint.gridx=1;
-		constraint.insets.top=0;
-		constraint.insets.bottom=30;
-		gridbl.setConstraints(bAlerte, constraint);
+		c.gridx=1;
+		c.insets.top=0;
+		c.insets.bottom=30;
+		gbl.setConstraints(bAlerte, c);
 		data.add(bAlerte);
 		
 		capteurTree.addTreeSelectionListener(new TreeSelectionListener() {
 			@Override
 			public void valueChanged(TreeSelectionEvent e) {
 				TreePath[] selected =capteurTree.getSelectionPaths();
-				List<Capteur> selectedCapteurs=new ArrayList<>();
-				for(TreePath node: selected){
-					List<Capteur>selectedCapteursInNode=ctm.getCapteurs(node);
-					for(Capteur c : selectedCapteursInNode)
-						if(!selectedCapteurs.contains(c))
-							selectedCapteurs.add(c);
+				if(selected!=null){
+					List<Capteur> selectedCapteurs=new ArrayList<>();
+					for(TreePath node: selected){
+						List<Capteur>selectedCapteursInNode=ctm.getCapteurs(node);
+						for(Capteur c : selectedCapteursInNode)
+							if(!selectedCapteurs.contains(c))
+								selectedCapteurs.add(c);
+					}
+					dm.show(selectedCapteurs);
 				}
-				dm.show(selectedCapteurs);
 			}
 		});
-		
 		connectB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				boolean toutVaBien=true;
@@ -246,7 +213,7 @@ public class Fenetre extends JFrame {
 					JOptionPane.showMessageDialog(new JFrame(), "Saisir un identifiant pour le capteur");
 				}
 				if(toutVaBien)try{
-					sIHM=new ServeurIHM(textIp.getText(),port,capteurListModel,dm);
+					sIHM=new ServeurIHM(textIp.getText(),port,capteurListModel,dm,ctm);
 					toutVaBien=sIHM.envoyerConnexionIHM(textID.getText());
 					if(!toutVaBien)JOptionPane.showMessageDialog(new JFrame(), "Connexion refusée");
 				}catch(Exception ex){
@@ -292,32 +259,12 @@ public class Fenetre extends JFrame {
 		});
 		inscB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
-				int ind[]=list.getSelectedIndices();
-				String[] capteurInscription= new String[ind.length];
-				for(int i=0; i<ind.length; i++){//obtenir les identifiants des capteurs selectionnés
-					capteurInscription[i]=capteurListModel.get(ind[i]);
-					String[] parts=capteurInscription[i].split(";");
-					capteurInscription[i]=parts[0];
-				}
-				String[] capteurValide = sIHM.inscrire(textID.getText(), capteurInscription);
-				for(String cap : capteurValide){
-					int i= getIndex(capteurInscription, cap);
-					String[] parts=capteurListModel.get(ind[i]).split(";");
-					if(parts.length==4 || parts.length==6){
-						if(parts.length==4){
-							GPSCoord gps= new GPSCoord(Double.parseDouble(parts[2]),Double.parseDouble(parts[3]));
-							TypeCapExter t= getTypeExter(parts[1]);
-							CapteurExterieur ce= new CapteurExterieur(parts[0], gps, t);
-							ctm.add(ce);
-							dm.add(ce);
-						}else{
-							TypeCapInter t= getTypeInter(parts[1]);
-							CapteurInterieur ci = new CapteurInterieur(parts[0], new Salle(new Etage(Etage.toInt(parts[3]), new Batiment(parts[2], 1, 2)), parts[4]), parts[5], t);
-							ctm.add(ci);
-							dm.add(ci);
-						}
-						capteurListModel.removeElementAt(i);
-					}
+				List<Capteur> capteurInscription= list.getSelectedValuesList();
+				Capteur[] capteurValide = sIHM.inscrire(textID.getText(), capteurInscription);
+				for(Capteur cap : capteurValide){
+					ctm.add(cap);
+					dm.add(cap);
+					capteurListModel.removeElement(cap);
 				}
 				list.clearSelection();
 				inscB.setEnabled(false);
@@ -327,10 +274,10 @@ public class Fenetre extends JFrame {
 		contentPane.add(tp);
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e){
+				if(sIHM!=null)sIHM.terminate();
 				if(connected){
 					sIHM.deconnecterIHM(textID.getText());
 				}
-				if(sIHM!=null)sIHM.terminateThread();
 			}
 		});
 	}
@@ -338,7 +285,7 @@ public class Fenetre extends JFrame {
 	public static void main(String[] args){
 		EventQueue.invokeLater(new Runnable() {
 			public void run(){
-				Fenetre frame = new Fenetre();
+				IHM frame = new IHM();
 				frame.setVisible(true);
 				frame.setLocationRelativeTo(null);
 			}

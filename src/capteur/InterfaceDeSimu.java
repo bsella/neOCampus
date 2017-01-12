@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -29,7 +31,7 @@ import capteur.emplacement.CapteurInterieur;
 import capteur.emplacement.Etage;
 import capteur.emplacement.Salle;
 
-public class Fenetre extends JFrame {
+public class InterfaceDeSimu extends JFrame {
 
 	private static final long serialVersionUID = 1L;
 	boolean connected=false;
@@ -43,7 +45,7 @@ public class Fenetre extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try{
-					Fenetre frame = new Fenetre();
+					InterfaceDeSimu frame = new InterfaceDeSimu();
 					frame.setVisible(true);
 					frame.setResizable(false);
 					frame.setLocationRelativeTo(null);
@@ -109,7 +111,7 @@ public class Fenetre extends JFrame {
 	/**
 	 * Create the frame.
 	 */
-	public Fenetre(){
+	public InterfaceDeSimu(){
 		/* Create the content pane */
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 600, 600);
@@ -485,7 +487,17 @@ public class Fenetre extends JFrame {
 				}
 			}
 		});
-		
+		addWindowListener(new WindowAdapter() {
+			public void windowClosing(WindowEvent e){
+				if(connected){
+					try {
+						sc.deconnecterCapteur(textID.getText());
+					} catch (Exception e1) {
+						e1.printStackTrace();
+					}
+				}
+			}
+		});
 		setLayout(new GridLayout(1, 1));
 		contentPane.add(tp);
 	}

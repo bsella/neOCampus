@@ -9,9 +9,9 @@ public class Batiment {
 	private String nom;
 	private GPSCoord gps;
 	List<Etage> etages= new ArrayList<>();
-	public Batiment(String nom, double lo, double la){
+	public Batiment(String nom, double la, double lo){
 		this.nom=nom;
-		gps= new GPSCoord(lo,la);
+		gps= new GPSCoord(la,lo);
 	}
 	public String getNom(){
 		return nom;
