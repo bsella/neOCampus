@@ -150,29 +150,21 @@ public class InterfaceVisu extends JFrame {
 		gbl.setConstraints(dataTable, c);
 		data.add(dataTable);
 		c.weightx=1;
-		gbl.setConstraints(scrollTree, c);
-		data.add(scrollTree);
+		data.add(scrollTree,c);
 		c.gridy=1;
 		c.weightx=5;
 		c.weighty=1;
-		gbl.setConstraints(listScroll, c);
-		data.add(listScroll);
+		data.add(listScroll,c);
 		JButton inscB= new JButton("S'inscrire");
+		JButton desinscB= new JButton("Se désinscrire");
+		JPanel boutons= new JPanel(new GridLayout(2, 1));
+		boutons.add(inscB);
+		boutons.add(desinscB);
 		inscB.setEnabled(false);
-		c.fill=GridBagConstraints.HORIZONTAL;
+		desinscB.setEnabled(false);
 		c.weightx=1;
-		c.weighty=1;
-		c.insets.top=30;
-		c.insets.bottom=0;
-		gbl.setConstraints(inscB, c);
-		data.add(inscB);
-		JButton bAlerte= new JButton("Alerte");
-		bAlerte.setEnabled(false);
-		c.gridx=1;
-		c.insets.top=0;
-		c.insets.bottom=30;
-		gbl.setConstraints(bAlerte, c);
-		data.add(bAlerte);
+		data.add(boutons,c);
+		
 		
 		capteurTree.addTreeSelectionListener(new TreeSelectionListener() {
 			@Override

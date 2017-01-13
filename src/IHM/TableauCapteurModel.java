@@ -43,7 +43,7 @@ public class TableauCapteurModel extends AbstractTableModel{
 				case 0: return ci.getID();
 				case 1: return ci.getType();
 				case 2: return ci.getBatiment().toString()+", "+ ci.getEtage().toString()+", salle :"+ci.getSalle().toString()+", "+ci.getPosition();
-				case 3: return getValue(ci)==null?"NULL":getValue(ci);
+				case 3: return getValue(ci)==null?"":getValue(ci);
 			}
 		}else{
 			CapteurExterieur ce= capListExt.get(rowIndex-capListInt.size());
@@ -51,7 +51,7 @@ public class TableauCapteurModel extends AbstractTableModel{
 				case 0: return ce.getID();
 				case 1: return ce.getType();
 				case 2: return ce.getGPS();
-				case 3: return getValue(ce)==null?"NULL":getValue(ce);
+				case 3: return getValue(ce)==null?"":getValue(ce);
 			}
 		}
 		return null;
