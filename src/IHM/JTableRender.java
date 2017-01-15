@@ -2,10 +2,11 @@ package IHM;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.util.zip.Inflater;
 
-import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
+
  
 public class JTableRender extends DefaultTableCellRenderer {
 
@@ -14,30 +15,30 @@ public class JTableRender extends DefaultTableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-        int selectedrow = table.getSelectedRow();
-        if(selectedrow != -1) {
+        
+        int selectedRow = table.getSelectedRow();
+        if(selectedRow != -1) {
         	component.setForeground(Color.BLACK);
+        	component.setBackground(Color.WHITE);
         }
-        /**
-         * Colorie les cellules en orange si le montant est inferieur au montant voulu
-         */
-        Object o = table.getValueAt(row, 3);
-        if (o != null && component instanceof JLabel) {
-            JLabel label = (JLabel) component;
-            double valeur;
-            try {
-            	valeur = Double.parseDouble(label.getText());
-            	// Valeur a changer avec pop-up et boutton Alerte
-            	if (valeur < 500) {
-                    Color clr = new Color(255, 226, 198);
-                    component.setBackground(clr);
-                    System.out.println("valeur" + valeur);
-                }
-			} catch (Exception e) {
-				Color color = new Color(255, 255, 255);
-		        component.setBackground(color);
-			}
+
+        TableauCapteurModel model = (TableauCapteurModel) table.getModel();
+        value = model.getValueAt(row, column);
+        System.out.println("Value : " + value);
+        int valAlerte = -1;
+        double valTableau = -1;
+        if (model.listeAlertes.size() > 0) {
+           	valAlerte = model.listeAlertes.get(0).getValAlerte();
+           	if (value instanceof Double) {
+           		valTableau = (double) value;
+           	} else {
+           		valTableau = valAlerte;	
+           	}
+           	if (valTableau < valAlerte ) {
+           		component.setBackground(Color.RED);
+           	} else {
+           		component.setBackground(Color.WHITE);
+           	}
         }
         return component;
     }

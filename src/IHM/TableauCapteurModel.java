@@ -17,7 +17,14 @@ public class TableauCapteurModel extends AbstractTableModel{
 	List<Capteur> capListAll= new ArrayList<>();
 	List<CapteurInterieur> capListInt= new ArrayList<>();
 	List<CapteurExterieur> capListExt= new ArrayList<>();
+	List<Alerte> listeAlertes = new ArrayList<>();
 	
+	public List<Alerte> getListeAlertes() {
+		return listeAlertes;
+	}
+	public void setListeAlertes(List<Alerte> listeAlertes) {
+		this.listeAlertes = listeAlertes;
+	}
 	private boolean contains(Capteur cap){
 		for(Capteur c : capListAll){
 			if(c.equals(cap))

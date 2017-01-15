@@ -1,5 +1,6 @@
 package IHM;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -15,12 +16,14 @@ import java.util.List;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -30,6 +33,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
@@ -39,7 +43,7 @@ import capteur.emplacement.Batiment;
 import capteur.emplacement.CapteurInterieur;
 import capteur.emplacement.Etage;
 import capteur.emplacement.Salle;
-// Sert a rien
+
 public class InterfaceVisu extends JFrame {
 	private static final long serialVersionUID = 1L;
 	private ServeurIHM sIHM;
@@ -79,8 +83,12 @@ public class InterfaceVisu extends JFrame {
 		JTabbedPane tp= new JTabbedPane();
 		JScrollPane connexion = new JScrollPane();
 		Container data = new Container();
+		Container alerte = new Container();
 		tp.addTab("Connexion", connexion);
+		// A suprrimer quand on doit rendre le projet
 		tp.addTab("Data", data);
+		tp.addTab("Alerte", alerte);
+		// A supprimer quand on doit rendre le projet
 		GridBagLayout gbl = new GridBagLayout();
 		data.setLayout(gbl);
 		connexion.setLayout(null);
@@ -96,7 +104,7 @@ public class InterfaceVisu extends JFrame {
 		
 		TableauCapteurModel dm= new TableauCapteurModel();
 		JTable t = new JTable(dm);
-		t.setDefaultRenderer(Object.class, new TableRender());
+		t.setDefaultRenderer(Object.class, new JTableRender());
 		JScrollPane dataTable= new JScrollPane(t);
 		CapteurInterieur test1= new CapteurInterieur("test1" , new Salle(new Etage(2, new Batiment("U3", 0, 1)), "103"), "testt", TypeCapInter.EAU_CHAUDE);
 		CapteurInterieur test2= new CapteurInterieur("test2" , new Salle(new Etage(2, new Batiment("U3", 0, 1)), "103"), "test", TypeCapInter.EAU_CHAUDE);
@@ -165,6 +173,84 @@ public class InterfaceVisu extends JFrame {
 		c.weightx=1;
 		data.add(boutons,c);
 		
+		/* Tab Alerte */
+		GridBagLayout gblAlerte = new GridBagLayout();
+		alerte.setLayout(gblAlerte);
+		JLabel textCapteur = new JLabel("Liste des Capteurs :");
+		JLabel textAlerte = new JLabel("Liste des Alertes :");
+		//JLabel textTypeCapteur = new JLabel("Type du capteur :");
+		JLabel textValAlerte = new JLabel("Valeur de l'alerte :");
+		JButton buttonValider = new JButton("Valider alerte");
+		JButton buttonSupprimer = new JButton("Supprimer alerte");
+		//JList<Capteur> capList=new JList<>(capteurListModel);
+		//JScrollPane ListeAlerte = new JScrollPane(capList);
+		JSpinner spinnerValAlerte = new JSpinner();
+		//JComboBox<TypeCapInter> ListecapInter = new JComboBox<TypeCapInter>(TypeCapInter.values());
+		
+		JTable tAlerte = new JTable(dm);
+		tAlerte.setDefaultRenderer(Object.class, new JTableRender());
+		JScrollPane dataTableCapAlerte= new JScrollPane(tAlerte);
+		
+		JTable tableauAlerte = new JTable(new DefaultTableModel(new Object[]{"ID", "Type Capteur","ValeurAlerte", "Alertes"}, getDefaultCloseOperation()));
+		List<Alerte> listeAlertes = new ArrayList<>();
+		dm.setListeAlertes(listeAlertes);
+		JScrollPane dataTabAlertes= new JScrollPane(tableauAlerte);
+		GridBagConstraints cAlerte= new GridBagConstraints();
+		//position grille
+		cAlerte.gridx=0;
+		cAlerte.gridy=0;
+		//nombre de case occupé
+			//Colone
+		cAlerte.gridwidth=1;
+			//ligne
+		cAlerte.gridheight=1;
+		//ratio des cases
+		cAlerte.weightx=1;
+		cAlerte.weighty=1;
+		cAlerte.fill=GridBagConstraints.BOTH;
+		alerte.add(textCapteur, cAlerte);
+		cAlerte.gridy=1;
+		alerte.add(textAlerte, cAlerte);
+		cAlerte.gridy=2;
+		//alerte.add(textTypeCapteur, cAlerte);
+		cAlerte.gridy=3;
+		alerte.add(textValAlerte, cAlerte);
+		cAlerte.gridy=4;
+		cAlerte.fill=GridBagConstraints.NONE;
+		alerte.add(buttonValider, cAlerte);
+		cAlerte.gridx=1;
+		cAlerte.gridy=0;
+		cAlerte.fill=GridBagConstraints.BOTH;
+		alerte.add(dataTableCapAlerte, cAlerte);
+		//alerte.add(capList, cAlerte);
+		cAlerte.gridy=1;
+		alerte.add(dataTabAlertes, cAlerte);
+		cAlerte.gridy=2;
+		cAlerte.fill=GridBagConstraints.HORIZONTAL;
+		//alerte.add(ListecapInter, cAlerte);
+		cAlerte.gridy=3;
+		alerte.add(spinnerValAlerte, cAlerte);
+		cAlerte.gridy=4;
+		cAlerte.fill=GridBagConstraints.NONE;
+		alerte.add(buttonSupprimer, cAlerte);
+		
+		buttonValider.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int selectedRow = tAlerte.getSelectedRow();
+		        if(selectedRow != -1) {
+		        	String ID = (String) dm.getValueAt(selectedRow, 0);
+		        	int niveauAlerte = (int) spinnerValAlerte.getValue();
+		        	/* Verif */
+		        	System.out.println("ID du capteur " + ID);
+		        	System.out.println("Niv d'alerte " + niveauAlerte);
+	        		Alerte alerte = new Alerte(ID, niveauAlerte);
+	        		listeAlertes.add(alerte);
+	        		System.out.println("Alerte Valide");
+		        }
+				
+			}
+		});
 		
 		capteurTree.addTreeSelectionListener(new TreeSelectionListener() {
 			@Override
@@ -182,6 +268,7 @@ public class InterfaceVisu extends JFrame {
 				}
 			}
 		});
+		
 		connectB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				boolean toutVaBien=true;
@@ -221,10 +308,12 @@ public class InterfaceVisu extends JFrame {
 					textID.setEnabled(false);
 					textPort.setEnabled(false);
 					tp.addTab("Data",data);
+					tp.addTab("Alerte",alerte);
 					tp.setSelectedComponent(data);
 				}
 			}
 		});
+		
 		deconnectB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				try{
@@ -235,6 +324,7 @@ public class InterfaceVisu extends JFrame {
 						textPort.setEnabled(true);
 						connected=false;
 						tp.remove(data);
+						tp.remove(alerte);
 					}
 					else JOptionPane.showMessageDialog(new JFrame(), "Déconnexion refusée");
 				} catch (Exception e1){
@@ -243,12 +333,14 @@ public class InterfaceVisu extends JFrame {
 				}
 			}
 		});
+		
 		list.addListSelectionListener(new ListSelectionListener(){
 			public void valueChanged(ListSelectionEvent e) {
 				if(!list.isSelectionEmpty())
 					inscB.setEnabled(true);
 			}
 		});
+		
 		inscB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				List<Capteur> capteurInscription= list.getSelectedValuesList();
@@ -262,6 +354,7 @@ public class InterfaceVisu extends JFrame {
 				inscB.setEnabled(false);
 			}
 		});
+		
 		setLayout(new GridLayout(1, 1));
 		contentPane.add(tp);
 		addWindowListener(new WindowAdapter() {
