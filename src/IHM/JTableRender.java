@@ -2,7 +2,6 @@ package IHM;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.util.zip.Inflater;
 
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -23,12 +22,17 @@ public class JTableRender extends DefaultTableCellRenderer {
         }
 
         TableauCapteurModel model = (TableauCapteurModel) table.getModel();
-        value = model.getValueAt(row, column);
-        System.out.println("Value : " + value);
+        value = model.getValueAt(row, 3);
+        String ID = (String) model.getValueAt(row, 0);
+        System.out.println("Value : " + value + " ID : " + ID);
         int valAlerte = -1;
         double valTableau = -1;
         if (model.listeAlertes.size() > 0) {
-           	valAlerte = model.listeAlertes.get(0).getValAlerte();
+        	for (int i = 0 ; i < model.listeAlertes.size() ; i++) {
+        		if (ID.equals(model.listeAlertes.get(i).getIDCapteur())) {
+        			valAlerte = model.listeAlertes.get(i).getValAlerte();
+        		}
+        	}
            	if (value instanceof Double) {
            		valTableau = (double) value;
            	} else {
