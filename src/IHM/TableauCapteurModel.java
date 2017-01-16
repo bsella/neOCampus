@@ -22,9 +22,11 @@ public class TableauCapteurModel extends AbstractTableModel{
 	public List<Alerte> getListeAlertes() {
 		return listeAlertes;
 	}
+	
 	public void setListeAlertes(List<Alerte> listeAlertes) {
 		this.listeAlertes = listeAlertes;
 	}
+	
 	private boolean contains(Capteur cap){
 		for(Capteur c : capListAll){
 			if(c.equals(cap))

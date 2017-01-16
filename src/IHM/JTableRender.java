@@ -15,6 +15,9 @@ public class JTableRender extends DefaultTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
         
+        component.setBackground(Color.WHITE);
+        component.setForeground(Color.BLACK);
+        
         int selectedRow = table.getSelectedRow();
         if(selectedRow != -1) {
         	component.setForeground(Color.BLACK);
@@ -27,10 +30,16 @@ public class JTableRender extends DefaultTableCellRenderer {
         System.out.println("Value : " + value + " ID : " + ID);
         int valAlerte = -1;
         double valTableau = -1;
+        boolean sens = false;
         if (model.listeAlertes.size() > 0) {
         	for (int i = 0 ; i < model.listeAlertes.size() ; i++) {
         		if (ID.equals(model.listeAlertes.get(i).getIDCapteur())) {
         			valAlerte = model.listeAlertes.get(i).getValAlerte();
+        		}
+        		if (model.listeAlertes.get(i).isSens()) {
+        			sens = true;
+        		} else {
+        			sens = false;
         		}
         	}
            	if (value instanceof Double) {
@@ -38,10 +47,18 @@ public class JTableRender extends DefaultTableCellRenderer {
            	} else {
            		valTableau = valAlerte;	
            	}
-           	if (valTableau < valAlerte ) {
-           		component.setBackground(Color.RED);
+           	if (sens) {
+           		if (valTableau < valAlerte ) {
+           			component.setBackground(Color.CYAN);
+           		} else {
+           			component.setBackground(Color.WHITE);
+           		}
            	} else {
-           		component.setBackground(Color.WHITE);
+           		if (valTableau > valAlerte ) {
+           			component.setBackground(Color.RED);
+           		} else {
+           			component.setBackground(Color.WHITE);
+           		}
            	}
         }
         return component;

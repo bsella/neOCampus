@@ -20,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
@@ -176,24 +177,25 @@ public class InterfaceVisu extends JFrame {
 		alerte.setLayout(gblAlerte);
 		JLabel textCapteur = new JLabel("Liste des Capteurs :");
 		JLabel textAlerte = new JLabel("Liste des Alertes :");
-		//JLabel textTypeCapteur = new JLabel("Type du capteur :");
 		JLabel textValAlerte = new JLabel("Valeur de l'alerte :");
 		JButton buttonValider = new JButton("Valider alerte");
 		JButton buttonSupprimer = new JButton("Supprimer alerte");
-		//JList<Capteur> capList=new JList<>(capteurListModel);
-		//JScrollPane ListeAlerte = new JScrollPane(capList);
 		JSpinner spinnerValAlerte = new JSpinner();
-		//JComboBox<TypeCapInter> ListecapInter = new JComboBox<TypeCapInter>(TypeCapInter.values());
+		JRadioButton inferieurR = new JRadioButton("inférieur à la valeur");
+		JRadioButton SuperieurR = new JRadioButton("supérieur à la valeur");
+		
 		
 		JTable tAlerte = new JTable(dm);
 		tAlerte.setDefaultRenderer(Object.class, new JTableRender());
 		JScrollPane dataTableCapAlerte= new JScrollPane(tAlerte);
 		
 		JTable tableauAlerte = new JTable(new DefaultTableModel(new Object[]{"ID", "Type Capteur","ValeurAlerte", "Alertes"}, getDefaultCloseOperation()));
+		DefaultTableModel modelAlerte = (DefaultTableModel) tableauAlerte.getModel();
+
 		List<Alerte> listeAlertes = new ArrayList<>();
 		dm.setListeAlertes(listeAlertes);
-		JScrollPane dataTabAlertes= new JScrollPane(tableauAlerte);
-		GridBagConstraints cAlerte= new GridBagConstraints();
+		JScrollPane dataTabAlertes = new JScrollPane(tableauAlerte);
+		GridBagConstraints cAlerte = new GridBagConstraints();
 		//position grille
 		cAlerte.gridx=0;
 		cAlerte.gridy=0;
@@ -210,9 +212,10 @@ public class InterfaceVisu extends JFrame {
 		cAlerte.gridy=1;
 		alerte.add(textAlerte, cAlerte);
 		cAlerte.gridy=2;
-		//alerte.add(textTypeCapteur, cAlerte);
-		cAlerte.gridy=3;
 		alerte.add(textValAlerte, cAlerte);
+		cAlerte.gridy=3;
+		inferieurR.setSelected(true);
+		alerte.add(inferieurR, cAlerte);
 		cAlerte.gridy=4;
 		cAlerte.fill=GridBagConstraints.NONE;
 		alerte.add(buttonValider, cAlerte);
@@ -220,17 +223,41 @@ public class InterfaceVisu extends JFrame {
 		cAlerte.gridy=0;
 		cAlerte.fill=GridBagConstraints.BOTH;
 		alerte.add(dataTableCapAlerte, cAlerte);
-		//alerte.add(capList, cAlerte);
 		cAlerte.gridy=1;
 		alerte.add(dataTabAlertes, cAlerte);
 		cAlerte.gridy=2;
 		cAlerte.fill=GridBagConstraints.HORIZONTAL;
-		//alerte.add(ListecapInter, cAlerte);
-		cAlerte.gridy=3;
 		alerte.add(spinnerValAlerte, cAlerte);
-		cAlerte.gridy=4;
+		cAlerte.gridy=3;
 		cAlerte.fill=GridBagConstraints.NONE;
+		alerte.add(SuperieurR, cAlerte);
+		cAlerte.gridy=4;
+//		cAlerte.fill=GridBagConstraints.NONE;
 		alerte.add(buttonSupprimer, cAlerte);
+		
+		inferieurR.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (inferieurR.isSelected()) {
+					SuperieurR.setSelected(false);
+				} else {
+					SuperieurR.setSelected(true);
+				}
+				
+			}
+		});
+		
+		SuperieurR.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (SuperieurR.isSelected()) {
+					inferieurR.setSelected(false);
+				} else {
+					inferieurR.setSelected(true);
+				}
+				
+			}
+		});
 		
 		buttonValider.addActionListener(new ActionListener() {
 			@Override
@@ -239,15 +266,41 @@ public class InterfaceVisu extends JFrame {
 		        if(selectedRow != -1) {
 		        	String ID = (String) dm.getValueAt(selectedRow, 0);
 		        	int niveauAlerte = (int) spinnerValAlerte.getValue();
+		        	boolean sens;
+		        	if (inferieurR.isSelected()) {
+		        		sens = true;
+		        	} else {
+		        		sens = false;
+		        	}
 		        	/* Verif */
-		        	System.out.println("ID du capteur " + ID);
+		        	System.out.println("ID du capteur pour l'alerte" + ID);
 		        	System.out.println("Niv d'alerte " + niveauAlerte);
-	        		Alerte alerte = new Alerte(ID, niveauAlerte);
+		        	
+	        		Alerte alerte = new Alerte(ID, niveauAlerte, sens);
 	        		listeAlertes.add(alerte);
+	        		modelAlerte.addRow(new Object[]{ID, dm.getValueAt(selectedRow, 1), niveauAlerte, 0});
 	        		System.out.println("Alerte Valide");
 		        }
-				
 			}
+		});
+		
+		buttonSupprimer.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				int selectedRow = tableauAlerte.getSelectedRow();
+		        if(selectedRow != -1) {
+		        	String ID = (String) modelAlerte.getValueAt(selectedRow, 0);
+		        	/* Verif */
+		        	System.out.println("ID du capteur à supprimer" + ID);
+		        	for (int i = 0; i < listeAlertes.size(); i++) {
+		        		if (ID.equals(listeAlertes.get(i).getIDCapteur())) {
+		        			listeAlertes.remove(i);
+		        			modelAlerte.removeRow(selectedRow);
+		        		}
+		        	}
+	        		System.out.println("Suppr done");
+		        }
+			}	
 		});
 		
 		capteurTree.addTreeSelectionListener(new TreeSelectionListener() {
