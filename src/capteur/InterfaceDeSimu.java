@@ -73,41 +73,6 @@ public class InterfaceDeSimu extends JFrame {
 	    }
 	}
 	
-	private TypeCapExter getTypeExter(String t){
-		switch(t){
-			case "Pression":
-				return TypeCapExter.PRESSION_ATMOSPHERIQUE;
-			case "Vitesse vent":
-				return TypeCapExter.VITESSE_VENT;
-			case "Température":
-				return TypeCapExter.TEMPERATURE;
-			case "Humidité":
-				return TypeCapExter.HUMIDITE;
-			case "Luminosité":
-				return TypeCapExter.LUMINOSITE;
-			default: return null;
-		}
-	}
-	
-	private TypeCapInter getTypeInter(String t){
-		switch(t){
-			case "Température":
-				return TypeCapInter.TEMPERATURE;
-			case "Humidité":
-				return TypeCapInter.HUMIDITE;
-			case "Luminosité":
-				return TypeCapInter.LUMINOSITE;
-			case "Volume sonore":
-				return TypeCapInter.VOLUME_SONORE;
-			case "Eau froide":
-				return TypeCapInter.EAU_FROIDE;
-			case "Eau chaude":
-				return TypeCapInter.EAU_CHAUDE;
-			case "Consommation éclairage":
-				return TypeCapInter.CONSOMMATION_ECLAIRAGE;
-			default: return null;
-		}
-	}
 	/**
 	 * Create the frame.
 	 */
@@ -245,7 +210,7 @@ public class InterfaceDeSimu extends JFrame {
 				if (pb.getValue()==pb.getMaximum()){
 					if(rdbtnExterieur.isSelected()){
 						try{
-							CapteurExterieur ce= new CapteurExterieur(textID.getText(), null, getTypeExter((String)mesureBox.getSelectedItem()));
+							CapteurExterieur ce= new CapteurExterieur(textID.getText(), null, TypeCapExter.getType((String)mesureBox.getSelectedItem()));
 							sc.envoyerValeurCapteur(ce.simule());
 						}catch (Exception e1){
 							JOptionPane.showMessageDialog(new JFrame(), "Erreur : serveur non connecte");
@@ -261,7 +226,7 @@ public class InterfaceDeSimu extends JFrame {
 						}
 					}else{
 						try{
-							CapteurInterieur ci= new CapteurInterieur(textID.getText(), null, "", getTypeInter((String)mesureBox.getSelectedItem()));
+							CapteurInterieur ci= new CapteurInterieur(textID.getText(), null, "", TypeCapInter.getType((String)mesureBox.getSelectedItem()));
 							sc.envoyerValeurCapteur(ci.simule());
 						}catch (Exception e1){
 							JOptionPane.showMessageDialog(new JFrame(), "Erreur : serveur non connecte");
@@ -386,7 +351,7 @@ public class InterfaceDeSimu extends JFrame {
 					JOptionPane.showMessageDialog(new JFrame(), "Saisir un identifiant pour le capteur");
 				}
 				if(toutVaBien)if(rdbtnExterieur.isSelected()){
-					TypeCapExter t=getTypeExter((String)mesureBox.getSelectedItem());
+					TypeCapExter t=TypeCapExter.getType((String)mesureBox.getSelectedItem());
 					GPSCoord gps=null;
 					if(toutVaBien) try{
 						toutVaBien=true;
@@ -413,7 +378,8 @@ public class InterfaceDeSimu extends JFrame {
 						JOptionPane.showMessageDialog(new JFrame(), "Erreur de connexion au serveur");
 					}
 				}else{
-					TypeCapInter t =getTypeInter((String)mesureBox.getSelectedItem());
+					TypeCapInter t =TypeCapInter.getType((String)mesureBox.getSelectedItem());
+					//System.out.println(t.toString());
 					int etage=0;
 					if(toutVaBien) try{
 						etage=Integer.parseInt((String)etageBox.getSelectedItem());

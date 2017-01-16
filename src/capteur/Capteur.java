@@ -44,6 +44,9 @@ public abstract class Capteur {
 	public int getFrec(){
 		return frequence;
 	}
+	public String getUDM(){
+		return uniteDeMesure;
+	}
 	public double simule(){
 		Random r= new Random();
 		double d= intervalleMin+r.nextDouble()*(intervalleMax-intervalleMin);

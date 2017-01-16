@@ -42,6 +42,7 @@ import capteur.emplacement.Batiment;
 import capteur.emplacement.CapteurInterieur;
 import capteur.emplacement.Etage;
 import capteur.emplacement.Salle;
+import interfaceSansConnexion.InterfaceSansConnexion;
 
 public class InterfaceVisu extends JFrame {
 	private static final long serialVersionUID = 1L;
@@ -74,7 +75,7 @@ public class InterfaceVisu extends JFrame {
 	
 	public InterfaceVisu(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(0, 0, 600, 600);
+		setBounds(0, 0, 1000, 600);
 		JPanel contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -87,9 +88,11 @@ public class InterfaceVisu extends JFrame {
 		// A suprrimer quand on doit rendre le projet
 		tp.addTab("Data", data);
 		tp.addTab("Alerte", alerte);
+		tp.add("Graphique", InterfaceSansConnexion.Panel());
 		// A supprimer quand on doit rendre le projet
 		GridBagLayout gbl = new GridBagLayout();
 		data.setLayout(gbl);
+		
 		
 		TableauCapteurModel dm= new TableauCapteurModel();
 		JTable t = new JTable(dm);
@@ -114,8 +117,6 @@ public class InterfaceVisu extends JFrame {
 		ctm.add(test4);
 		ctm.remove("test4");
 		ctm.remove("test3");
-		//ctm.remove("test1");
-		//ctm.remove("test2");
 		dm.add(test1);
 		dm.add(test2);
 		dm.add(test3);
@@ -180,21 +181,16 @@ public class InterfaceVisu extends JFrame {
 		/* Tab Alerte */
 		GridBagLayout gblAlerte = new GridBagLayout();
 		alerte.setLayout(gblAlerte);
-		JLabel textCapteur = new JLabel("Liste des Capteurs :");
-		JLabel textAlerte = new JLabel("Liste des Alertes :");
-		JLabel textValAlerte = new JLabel("Valeur de l'alerte :");
 		JButton buttonValider = new JButton("Valider alerte");
 		JButton buttonSupprimer = new JButton("Supprimer alerte");
 		JSpinner spinnerValAlerte = new JSpinner();
 		JRadioButton inferieurR = new JRadioButton("inférieur à la valeur");
 		JRadioButton superieurR = new JRadioButton("supérieur à la valeur");
 		
-		
 		JTable tAlerte = new JTable(dm);
 		tAlerte.setDefaultRenderer(Object.class, new JTableRender());
 		JScrollPane dataTableCapAlerte= new JScrollPane(tAlerte);
 		
-		//DefaultTableModel modelAlerte = (DefaultTableModel) tableauAlerte.getModel();
 		DefaultTableModel modelAlerte = new DefaultTableModel(new Object[]{"ID", "Type Capteur","ValeurAlerte", "Alertes"},0);
 		JTable tableauAlerte = new JTable(modelAlerte);
 
@@ -213,11 +209,11 @@ public class InterfaceVisu extends JFrame {
 		//ratio des cases
 		c.weightx=1;
 		c.fill=GridBagConstraints.BOTH;
-		alerte.add(textCapteur, c);
+		alerte.add(new JLabel("Liste des Capteurs :"), c);
 		c.gridy++;
-		alerte.add(textAlerte, c);
+		alerte.add(new JLabel("Liste des Alertes :"), c);
 		c.gridy++;
-		alerte.add(textValAlerte, c);
+		alerte.add(new JLabel("Valeur de l'alerte :"), c);
 		c.weightx=4;
 		c.gridx=1; c.gridy=0;
 		alerte.add(dataTableCapAlerte, c);
@@ -366,6 +362,7 @@ public class InterfaceVisu extends JFrame {
 		deconnectB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				try{
+					InterfaceSansConnexion.stopToutEnregistrement(); //Rajout
 					if(sIHM.deconnecterIHM(textID.getText())){
 						connectB.setEnabled(true);
 						deconnectB.setEnabled(false);
@@ -397,6 +394,7 @@ public class InterfaceVisu extends JFrame {
 				for(Capteur cap : capteurValide){
 					ctm.add(cap);
 					dm.add(cap);
+					InterfaceSansConnexion.commencerEnregistrement(cap); //Rajout
 					capteurListModel.removeElement(cap);
 				}
 				list.clearSelection();
@@ -408,6 +406,7 @@ public class InterfaceVisu extends JFrame {
 		contentPane.add(tp);
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e){
+				InterfaceSansConnexion.stopToutEnregistrement(); //Rajout
 				if(sIHM!=null)sIHM.terminate();
 				if(connected){
 					sIHM.deconnecterIHM(textID.getText());

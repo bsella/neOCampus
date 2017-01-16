@@ -19,6 +19,7 @@ import capteur.emplacement.Batiment;
 import capteur.emplacement.CapteurInterieur;
 import capteur.emplacement.Etage;
 import capteur.emplacement.Salle;
+import interfaceSansConnexion.InterfaceSansConnexion;
 
 public class ServeurIHM extends Thread{
 	private Socket sock;
@@ -135,17 +136,20 @@ public class ServeurIHM extends Thread{
 				String buff =read();
 				String parts[]= buff.split(";");
 				System.out.println(buff);
-				Capteur cap=null;
 				switch(parts[0]){
 					case "CapteurPresent":
-						if(parts.length==7)
-							cap= new CapteurInterieur(parts[1], new Salle(Etage.toEtage(parts[4], new Batiment(parts[3], 0, 0)), parts[5]), parts[6], TypeCapInter.getTypeInter(parts[2]));
-						else
-							cap = new CapteurExterieur(parts[1], new GPSCoord(Double.parseDouble(parts[3]), Double.parseDouble(parts[4])), TypeCapExter.getTypeExter(parts[2]));
-						addToList(cap);
+						if(parts.length==7){
+							CapteurInterieur cap= new CapteurInterieur(parts[1], new Salle(new Etage(Integer.parseInt(parts[4]), new Batiment(parts[3], 0, 0)), parts[5]), parts[6], TypeCapInter.getType(parts[2]));
+							addToList(cap);							
+						}
+						else{
+							CapteurExterieur cap = new CapteurExterieur(parts[1], new GPSCoord(Double.parseDouble(parts[3]), Double.parseDouble(parts[4])), TypeCapExter.getType(parts[2]));
+							addToList(cap);
+						}
 						break;
 					case "ValeurCapteur":
 						changeVal(parts[1], Double.parseDouble(parts[2]));
+						InterfaceSansConnexion.recupererDonnee(parts[1], Float.parseFloat(parts[2]));
 						break;
 					case "CapteurDeco":
 						remove(parts[1]);

@@ -48,7 +48,7 @@ public class ServeurCapteur {
 	}
 	public boolean envoyerConnexionCapteur(CapteurInterieur ci) throws Exception{
 		PrintStream p= new PrintStream(sock.getOutputStream());
-		p.println("ConnexionCapteur;"+ci.getID()+";"+ci.getType().toString()+";"+ci.getBatiment()+";"+ci.getEtage()+";"+ci.getSalle()+";"+ci.getPosition());
+		p.println("ConnexionCapteur;"+ci.getID()+";"+ci.getType().toString()+";"+ci.getBatiment()+";"+ci.getEtage().get()+";"+ci.getSalle()+";"+ci.getPosition());
 		@SuppressWarnings("resource")
 		Scanner sc=new Scanner(sock.getInputStream());
 		String conf =sc.nextLine();

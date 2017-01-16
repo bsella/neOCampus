@@ -1,31 +1,25 @@
 package capteur;
 
 public enum TypeCapInter {
-	TEMPERATURE,
-	HUMIDITE,
-	LUMINOSITE,
-	VOLUME_SONORE,
-	CONSOMMATION_ECLAIRAGE,
-	EAU_FROIDE,
-	EAU_CHAUDE;
-	public static TypeCapInter getTypeInter(String t){
-		switch(t){
-			case "TEMPERATURE":
-				return TypeCapInter.TEMPERATURE;
-			case "HUMIDITE":
-				return TypeCapInter.HUMIDITE;
-			case "LUMINOSITE":
-				return TypeCapInter.LUMINOSITE;
-			case "VOLUME_SONORE":
-				return TypeCapInter.VOLUME_SONORE;
-			case "EAU_FROIDE":
-				return TypeCapInter.EAU_FROIDE;
-			case "EAU_CHAUDE":
-				return TypeCapInter.EAU_CHAUDE;
-			case "CONSOMMATION_ECLAIRAGE":
-				return TypeCapInter.CONSOMMATION_ECLAIRAGE;
-			default: return null;
-		}
+	TEMPERATURE("Température"),
+	HUMIDITE("Humidité"),
+	LUMINOSITE("Luminosité"),
+	VOLUME_SONORE("Volume sonore"),
+	CONSOMMATION_ECLAIRAGE("Consommation éclairage"),
+	EAU_FROIDE("Eau froide"),
+	EAU_CHAUDE("Eau chaude");
+	private String nom;
+	private TypeCapInter(String s){
+		this.nom= s;
+	}
+	public String toString(){
+		return nom;
+	}
+	public static TypeCapInter getType(String s){
+		for(TypeCapInter inter : TypeCapInter.values())
+			if(inter.nom.equals(s))
+				return inter;
+		return null;
 	}
 }
 

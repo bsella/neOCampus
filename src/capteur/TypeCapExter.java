@@ -1,24 +1,22 @@
 package capteur;
 
 public enum TypeCapExter {
-	TEMPERATURE,
-	HUMIDITE,
-	LUMINOSITE,
-	VITESSE_VENT,
-	PRESSION_ATMOSPHERIQUE;
-	public static TypeCapExter getTypeExter(String t){
-		switch(t){
-			case "PRESSION":
-				return TypeCapExter.PRESSION_ATMOSPHERIQUE;
-			case "VITESSE_VENT":
-				return TypeCapExter.VITESSE_VENT;
-			case "TEMPERATURE":
-				return TypeCapExter.TEMPERATURE;
-			case "HUMIDITE":
-				return TypeCapExter.HUMIDITE;
-			case "LUMINOSITE":
-				return TypeCapExter.LUMINOSITE;
-			default: return null;
-		}
+	TEMPERATURE("Température"),
+	HUMIDITE("Humidité"),
+	LUMINOSITE("Luminosité"),
+	VITESSE_VENT("Vitesse vent"),
+	PRESSION_ATMOSPHERIQUE("Pression atmosphérique");
+	private String nom;
+	private TypeCapExter(String nom){
+		this.nom=nom;
+	}
+	public String toString(){
+		return this.nom;
+	}
+	public static TypeCapExter getType(String s){
+		for(TypeCapExter exter : TypeCapExter.values())
+			if(exter.nom.equals(s))
+				return exter;
+		return null;
 	}
 }
