@@ -80,7 +80,7 @@ public class InterfaceVisu extends JFrame {
 		setContentPane(contentPane);
 		
 		JTabbedPane tp= new JTabbedPane();
-		JScrollPane connexion = new JScrollPane();
+		Container connexion = new Container();
 		Container data = new Container();
 		Container alerte = new Container();
 		tp.addTab("Connexion", connexion);
@@ -90,16 +90,6 @@ public class InterfaceVisu extends JFrame {
 		// A supprimer quand on doit rendre le projet
 		GridBagLayout gbl = new GridBagLayout();
 		data.setLayout(gbl);
-		connexion.setLayout(null);
-		
-		JLabel lblID = new JLabel("Identifiant :");
-		JLabel lblIp = new JLabel("Addresse du serveur :");
-		JLabel lblPort = new JLabel("Numéro de port :");
-		JTextField textID = new JTextField("hjsf");
-		JTextField textIp = new JTextField("127.0.0.1");
-		JTextField textPort = new JTextField("7888");
-		JButton connectB = new JButton("Connexion au Serveur");
-		JButton deconnectB = new JButton("Déconnexion");
 		
 		TableauCapteurModel dm= new TableauCapteurModel();
 		JTable t = new JTable(dm);
@@ -131,31 +121,46 @@ public class InterfaceVisu extends JFrame {
 		dm.add(test3);
 		dm.add(test4);
 		
-		lblID.setBounds(130, 123, 150, 16);
-		textID.setBounds(280, 120, 150, 26);
-		lblIp.setBounds(130, 183, 150, 16);
-		textIp.setBounds(280, 180, 122, 26);
-		lblPort.setBounds(130, 243, 150, 16);
-		textPort.setBounds(280, 240, 55, 26);
-		connectB.setBounds(70, 350, 200, 100);
-		deconnectB.setBounds(290, 350, 200, 100);
-		deconnectB.setEnabled(false);
-		
-		connexion.add(lblID);
-		connexion.add(textID);
-		connexion.add(lblIp);
-		connexion.add(textIp);
-		connexion.add(lblPort);
-		connexion.add(textPort);
-		connexion.add(connectB);
-		connexion.add(deconnectB);
-		JScrollPane scrollTree= new JScrollPane(capteurTree);
+		GridBagLayout gblConnextion = new GridBagLayout();
+		connexion.setLayout(gblConnextion);
 		GridBagConstraints c= new GridBagConstraints();
+		
+		JTextField textID =new JTextField(20);
+		JTextField textIp =new JTextField(15);
+		JTextField textPort =new JTextField(5);
+		JButton connectB =new JButton("Connexion au Serveur");
+		JButton deconnectB =new JButton("Déconnexion");
+		
+		deconnectB.setEnabled(false);
+		c.weightx=1;c.weighty=1;
+		c.gridx=0;c.gridy=0;
+		c.fill=GridBagConstraints.HORIZONTAL;
+		connexion.add(new JLabel("Identifiant :"),c);
+		c.gridy++;
+		connexion.add(new JLabel("Addresse du serveur :"),c);
+		c.gridy++;
+		connexion.add(new JLabel("Numéro de port :"),c);
+		c.gridy++;
+		c.fill=GridBagConstraints.BOTH;
+		connexion.add(connectB,c);
+		c.fill=GridBagConstraints.HORIZONTAL;
+		c.gridy=0;
+		c.gridx=1;
+		connexion.add(textID,c);
+		c.gridy++;
+		connexion.add(textIp,c);
+		c.gridy++;
+		connexion.add(textPort,c);
+		c.gridy++;
+		c.fill=GridBagConstraints.BOTH;
+		connexion.add(deconnectB,c);
+		
+		JScrollPane scrollTree= new JScrollPane(capteurTree);
+		c= new GridBagConstraints();
 		c.weightx=5;
 		c.weighty=5;
 		c.fill=GridBagConstraints.BOTH;
-		gbl.setConstraints(dataTable, c);
-		data.add(dataTable);
+		data.add(dataTable,c);
 		c.weightx=1;
 		data.add(scrollTree,c);
 		c.gridy=1;
@@ -182,75 +187,68 @@ public class InterfaceVisu extends JFrame {
 		JButton buttonSupprimer = new JButton("Supprimer alerte");
 		JSpinner spinnerValAlerte = new JSpinner();
 		JRadioButton inferieurR = new JRadioButton("inférieur à la valeur");
-		JRadioButton SuperieurR = new JRadioButton("supérieur à la valeur");
+		JRadioButton superieurR = new JRadioButton("supérieur à la valeur");
 		
 		
 		JTable tAlerte = new JTable(dm);
 		tAlerte.setDefaultRenderer(Object.class, new JTableRender());
 		JScrollPane dataTableCapAlerte= new JScrollPane(tAlerte);
 		
-		JTable tableauAlerte = new JTable(new DefaultTableModel(new Object[]{"ID", "Type Capteur","ValeurAlerte", "Alertes"}, getDefaultCloseOperation()));
-		DefaultTableModel modelAlerte = (DefaultTableModel) tableauAlerte.getModel();
+		//DefaultTableModel modelAlerte = (DefaultTableModel) tableauAlerte.getModel();
+		DefaultTableModel modelAlerte = new DefaultTableModel(new Object[]{"ID", "Type Capteur","ValeurAlerte", "Alertes"},0);
+		JTable tableauAlerte = new JTable(modelAlerte);
 
 		List<Alerte> listeAlertes = new ArrayList<>();
 		dm.setListeAlertes(listeAlertes);
 		JScrollPane dataTabAlertes = new JScrollPane(tableauAlerte);
-		GridBagConstraints cAlerte = new GridBagConstraints();
-		//position grille
-		cAlerte.gridx=0;
-		cAlerte.gridy=0;
-		//nombre de case occupé
-			//Colone
-		cAlerte.gridwidth=1;
-			//ligne
-		cAlerte.gridheight=1;
-		//ratio des cases
-		cAlerte.weightx=1;
-		cAlerte.weighty=1;
-		cAlerte.fill=GridBagConstraints.BOTH;
-		alerte.add(textCapteur, cAlerte);
-		cAlerte.gridy=1;
-		alerte.add(textAlerte, cAlerte);
-		cAlerte.gridy=2;
-		alerte.add(textValAlerte, cAlerte);
-		cAlerte.gridy=3;
+		JPanel boutonsRadioAlerte = new JPanel(new GridLayout(2,2));
 		inferieurR.setSelected(true);
-		alerte.add(inferieurR, cAlerte);
-		cAlerte.gridy=4;
-		cAlerte.fill=GridBagConstraints.NONE;
-		alerte.add(buttonValider, cAlerte);
-		cAlerte.gridx=1;
-		cAlerte.gridy=0;
-		cAlerte.fill=GridBagConstraints.BOTH;
-		alerte.add(dataTableCapAlerte, cAlerte);
-		cAlerte.gridy=1;
-		alerte.add(dataTabAlertes, cAlerte);
-		cAlerte.gridy=2;
-		cAlerte.fill=GridBagConstraints.HORIZONTAL;
-		alerte.add(spinnerValAlerte, cAlerte);
-		cAlerte.gridy=3;
-		cAlerte.fill=GridBagConstraints.NONE;
-		alerte.add(SuperieurR, cAlerte);
-		cAlerte.gridy=4;
-//		cAlerte.fill=GridBagConstraints.NONE;
-		alerte.add(buttonSupprimer, cAlerte);
+		boutonsRadioAlerte.add(inferieurR);
+		boutonsRadioAlerte.add(superieurR);
+		boutonsRadioAlerte.add(buttonValider);
+		boutonsRadioAlerte.add(buttonSupprimer);
+		//position grille
+		c.gridx=0; c.gridy=0;
+		//nombre de case occupé
+		//ratio des cases
+		c.weightx=1;
+		c.fill=GridBagConstraints.BOTH;
+		alerte.add(textCapteur, c);
+		c.gridy++;
+		alerte.add(textAlerte, c);
+		c.gridy++;
+		alerte.add(textValAlerte, c);
+		c.weightx=4;
+		c.gridx=1; c.gridy=0;
+		alerte.add(dataTableCapAlerte, c);
+		c.gridy++;
+		alerte.add(dataTabAlertes, c);
+		c.gridy++;
+		c.fill=GridBagConstraints.HORIZONTAL;
+		c.weightx=1;
+		alerte.add(spinnerValAlerte, c);
+		c.gridy++;
+		c.fill=GridBagConstraints.BOTH;
+		c.gridx=0;
+		c.gridwidth=2;
+		alerte.add(boutonsRadioAlerte, c);
 		
 		inferieurR.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				if (inferieurR.isSelected()) {
-					SuperieurR.setSelected(false);
+					superieurR.setSelected(false);
 				} else {
-					SuperieurR.setSelected(true);
+					superieurR.setSelected(true);
 				}
 				
 			}
 		});
 		
-		SuperieurR.addActionListener(new ActionListener() {
+		superieurR.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (SuperieurR.isSelected()) {
+				if (superieurR.isSelected()) {
 					inferieurR.setSelected(false);
 				} else {
 					inferieurR.setSelected(true);
