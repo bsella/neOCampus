@@ -1,26 +1,24 @@
 package IHM;
 
-public class Alerte {
-
-	String IDCapteur;
-	int valAlerte;
-	boolean sens;
+public class Alerte{
+	private double valAlerte;
+	private boolean superieur;
 	
-	public Alerte (String ID, int valAlerte, boolean sens ) {
-		this.IDCapteur = ID;
+	public Alerte(double valAlerte, boolean sens){
 		this.valAlerte = valAlerte;
-		this.sens = sens;
+		this.superieur = sens;
 	}
-
-	public boolean isSens() {
-		return sens;
+	public boolean isSuperieur(){
+		return superieur;
 	}
-	
-	public String getIDCapteur() {
-		return IDCapteur;
-	}
-
-	public int getValAlerte() {
+	public double getValAlerte() {
 		return valAlerte;
+	}
+	public boolean equals(Object o){
+		if(o instanceof Alerte){
+			Alerte a=(Alerte)o;
+			return valAlerte==a.valAlerte && superieur==a.superieur;
+		}
+		return false;
 	}
 }

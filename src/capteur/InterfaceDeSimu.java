@@ -148,7 +148,7 @@ public class InterfaceDeSimu extends JFrame {
 		pb.setBounds(5, 500, 560, 20);
 
 		capteur.setLayout(null);
-		connexion.setLayout(null);//new GridLayout(2, 1));
+		connexion.setLayout(null);
 		textLat.setColumns(10);
 		textLon.setColumns(10);
 		batiBox.setVisible(false);

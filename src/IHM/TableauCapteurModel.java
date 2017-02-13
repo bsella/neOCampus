@@ -1,7 +1,9 @@
 package IHM;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.table.AbstractTableModel;
 
@@ -17,14 +19,24 @@ public class TableauCapteurModel extends AbstractTableModel{
 	List<Capteur> capListAll= new ArrayList<>();
 	List<CapteurInterieur> capListInt= new ArrayList<>();
 	List<CapteurExterieur> capListExt= new ArrayList<>();
-	List<Alerte> listeAlertes = new ArrayList<>();
+	Map<String,List<Alerte>> listeAlertes = new HashMap<>();
 	
-	public List<Alerte> getListeAlertes() {
-		return listeAlertes;
+	public List<Alerte> getAlertes(String id){
+		if(listeAlertes.containsKey(id))
+			return listeAlertes.get(id);
+		return new ArrayList<Alerte>();
 	}
-	
-	public void setListeAlertes(List<Alerte> listeAlertes) {
-		this.listeAlertes = listeAlertes;
+	public void addAlerte(String id, Alerte a){
+		List<Alerte> listA=getAlertes(id);
+		listA.add(a);
+		listeAlertes.put(id, listA);
+		fireTableDataChanged();
+	}
+	public void removeAlerte(String id, Alerte a){
+		List<Alerte> listA=getAlertes(id);
+		listA.remove(a);
+		listeAlertes.put(id, listA);
+		fireTableDataChanged();
 	}
 	
 	private boolean contains(Capteur cap){

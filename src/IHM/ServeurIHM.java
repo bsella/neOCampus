@@ -110,6 +110,35 @@ public class ServeurIHM extends Thread{
 			returnCap[i]=listeCapteurs.get(i);
 		return returnCap;
 	}
+	
+	public Capteur[] desinscrire(String ID, List<Capteur> listeCapteurs){
+		String buff="DesinscriptionCapteur";
+		for(Capteur cap : listeCapteurs)
+			buff+=";"+cap.getID();
+		send(buff);
+		buff=readThread();
+		String[] parts=buff.split(";");
+		if(parts[0].equals("DesinscriptionCapteurKO")){
+			Capteur[] capteursValides= new Capteur[listeCapteurs.size()-(parts.length-1)];
+			int index=0;
+			for(int j=0;j<listeCapteurs.size();j++){
+				boolean contain=false;
+				for(int i=1;i<parts.length;i++){
+					if(listeCapteurs.get(j).getID().equals(parts[i]))
+						contain=true;
+				}
+				if(!contain){
+					capteursValides[index]=listeCapteurs.get(j);
+					index++;
+				}
+			}
+			return capteursValides;
+		}
+		Capteur[] returnCap= new Capteur[listeCapteurs.size()];
+		for(int i=0; i<listeCapteurs.size();i++)
+			returnCap[i]=listeCapteurs.get(i);
+		return returnCap;
+	}
 	public void terminate(){
 		running=false;
 	}

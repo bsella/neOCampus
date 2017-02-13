@@ -22,7 +22,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
-import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
@@ -37,11 +36,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 
 import capteur.Capteur;
-import capteur.TypeCapInter;
-import capteur.emplacement.Batiment;
-import capteur.emplacement.CapteurInterieur;
-import capteur.emplacement.Etage;
-import capteur.emplacement.Salle;
 import interfaceSansConnexion.InterfaceSansConnexion;
 
 public class InterfaceVisu extends JFrame {
@@ -65,14 +59,6 @@ public class InterfaceVisu extends JFrame {
 	    }
 	}
 	
-	int getIndex(String[] ss, String s){
-		for(int i=0; i<ss.length; i++){
-			if(ss[i].equals(s))
-				return i;
-		}
-		return -1;
-	}
-	
 	public InterfaceVisu(){
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(0, 0, 1000, 600);
@@ -85,23 +71,14 @@ public class InterfaceVisu extends JFrame {
 		Container data = new Container();
 		Container alerte = new Container();
 		tp.addTab("Connexion", connexion);
-		// A suprrimer quand on doit rendre le projet
-		tp.addTab("Data", data);
-		tp.addTab("Alerte", alerte);
 		tp.add("Graphique", InterfaceSansConnexion.Panel());
-		// A supprimer quand on doit rendre le projet
 		GridBagLayout gbl = new GridBagLayout();
 		data.setLayout(gbl);
-		
 		
 		TableauCapteurModel dm= new TableauCapteurModel();
 		JTable t = new JTable(dm);
 		t.setDefaultRenderer(Object.class, new JTableRender());
 		JScrollPane dataTable= new JScrollPane(t);
-		CapteurInterieur test1= new CapteurInterieur("test1" , new Salle(new Etage(2, new Batiment("U3", 0, 1)), "103"), "testt", TypeCapInter.EAU_CHAUDE);
-		CapteurInterieur test2= new CapteurInterieur("test2" , new Salle(new Etage(2, new Batiment("U3", 0, 1)), "103"), "test", TypeCapInter.EAU_CHAUDE);
-		CapteurInterieur test3= new CapteurInterieur("test3" , new Salle(new Etage(1, new Batiment("U2", 0, 1)), "104"), "test", TypeCapInter.EAU_CHAUDE);
-		CapteurInterieur test4= new CapteurInterieur("test4" , new Salle(new Etage(2, new Batiment("U2", 0, 1)), "104"), "test", TypeCapInter.EAU_CHAUDE);
 		
 		DefaultListModel<Capteur> capteurListModel= new DefaultListModel<>();
 		JList<Capteur> list=new JList<>(capteurListModel);
@@ -111,17 +88,6 @@ public class InterfaceVisu extends JFrame {
 		DefaultMutableTreeNode root =new DefaultMutableTreeNode("Capteurs");
 		CapteurTreeModel ctm= new CapteurTreeModel(root);
 		JTree capteurTree=new JTree(ctm);
-		ctm.add(test1);
-		ctm.add(test2);
-		ctm.add(test3);
-		ctm.add(test4);
-		ctm.remove("test4");
-		ctm.remove("test3");
-		dm.add(test1);
-		dm.add(test2);
-		dm.add(test3);
-		dm.add(test4);
-		
 		GridBagLayout gblConnextion = new GridBagLayout();
 		connexion.setLayout(gblConnextion);
 		GridBagConstraints c= new GridBagConstraints();
@@ -183,7 +149,7 @@ public class InterfaceVisu extends JFrame {
 		alerte.setLayout(gblAlerte);
 		JButton buttonValider = new JButton("Valider alerte");
 		JButton buttonSupprimer = new JButton("Supprimer alerte");
-		JSpinner spinnerValAlerte = new JSpinner();
+		JTextField valAlerte = new JTextField();
 		JRadioButton inferieurR = new JRadioButton("inférieur à la valeur");
 		JRadioButton superieurR = new JRadioButton("supérieur à la valeur");
 		
@@ -191,11 +157,9 @@ public class InterfaceVisu extends JFrame {
 		tAlerte.setDefaultRenderer(Object.class, new JTableRender());
 		JScrollPane dataTableCapAlerte= new JScrollPane(tAlerte);
 		
-		DefaultTableModel modelAlerte = new DefaultTableModel(new Object[]{"ID", "Type Capteur","ValeurAlerte", "Alertes"},0);
+		DefaultTableModel modelAlerte = new DefaultTableModel(new Object[]{"ID", "Type Capteur","ValeurAlerte", "Sup/Inf"},0);
 		JTable tableauAlerte = new JTable(modelAlerte);
 
-		List<Alerte> listeAlertes = new ArrayList<>();
-		dm.setListeAlertes(listeAlertes);
 		JScrollPane dataTabAlertes = new JScrollPane(tableauAlerte);
 		JPanel boutonsRadioAlerte = new JPanel(new GridLayout(2,2));
 		inferieurR.setSelected(true);
@@ -203,10 +167,7 @@ public class InterfaceVisu extends JFrame {
 		boutonsRadioAlerte.add(superieurR);
 		boutonsRadioAlerte.add(buttonValider);
 		boutonsRadioAlerte.add(buttonSupprimer);
-		//position grille
 		c.gridx=0; c.gridy=0;
-		//nombre de case occupé
-		//ratio des cases
 		c.weightx=1;
 		c.fill=GridBagConstraints.BOTH;
 		alerte.add(new JLabel("Liste des Capteurs :"), c);
@@ -222,58 +183,37 @@ public class InterfaceVisu extends JFrame {
 		c.gridy++;
 		c.fill=GridBagConstraints.HORIZONTAL;
 		c.weightx=1;
-		alerte.add(spinnerValAlerte, c);
+		alerte.add(valAlerte, c);
 		c.gridy++;
 		c.fill=GridBagConstraints.BOTH;
 		c.gridx=0;
 		c.gridwidth=2;
 		alerte.add(boutonsRadioAlerte, c);
 		
-		inferieurR.addActionListener(new ActionListener() {
+		inferieurR.addActionListener(new ActionListener(){
 			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (inferieurR.isSelected()) {
-					superieurR.setSelected(false);
-				} else {
-					superieurR.setSelected(true);
-				}
-				
+			public void actionPerformed(ActionEvent e){
+				superieurR.setSelected(!inferieurR.isSelected());
 			}
 		});
 		
-		superieurR.addActionListener(new ActionListener() {
+		superieurR.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (superieurR.isSelected()) {
-					inferieurR.setSelected(false);
-				} else {
-					inferieurR.setSelected(true);
-				}
-				
+				inferieurR.setSelected(!superieurR.isSelected());
 			}
 		});
 		
-		buttonValider.addActionListener(new ActionListener() {
+		buttonValider.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				int selectedRow = tAlerte.getSelectedRow();
-		        if(selectedRow != -1) {
+		        if(selectedRow != -1){
 		        	String ID = (String) dm.getValueAt(selectedRow, 0);
-		        	int niveauAlerte = (int) spinnerValAlerte.getValue();
-		        	boolean sens;
-		        	if (inferieurR.isSelected()) {
-		        		sens = true;
-		        	} else {
-		        		sens = false;
-		        	}
-		        	/* Verif */
-		        	System.out.println("ID du capteur pour l'alerte" + ID);
-		        	System.out.println("Niv d'alerte " + niveauAlerte);
-		        	
-	        		Alerte alerte = new Alerte(ID, niveauAlerte, sens);
-	        		listeAlertes.add(alerte);
-	        		modelAlerte.addRow(new Object[]{ID, dm.getValueAt(selectedRow, 1), niveauAlerte, 0});
-	        		System.out.println("Alerte Valide");
+		        	double val=Double.parseDouble(valAlerte.getText());
+	        		Alerte alerte = new Alerte(val, superieurR.isSelected());
+	        		dm.addAlerte(ID,alerte);
+	        		modelAlerte.addRow(new Object[]{ID, dm.getValueAt(selectedRow, 1), val, alerte.isSuperieur()?"Superieur":"Inferieur"});
 		        }
 			}
 		});
@@ -284,24 +224,20 @@ public class InterfaceVisu extends JFrame {
 				int selectedRow = tableauAlerte.getSelectedRow();
 		        if(selectedRow != -1) {
 		        	String ID = (String) modelAlerte.getValueAt(selectedRow, 0);
-		        	/* Verif */
-		        	System.out.println("ID du capteur à supprimer" + ID);
-		        	for (int i = 0; i < listeAlertes.size(); i++) {
-		        		if (ID.equals(listeAlertes.get(i).getIDCapteur())) {
-		        			listeAlertes.remove(i);
-		        			modelAlerte.removeRow(selectedRow);
-		        		}
-		        	}
-	        		System.out.println("Suppr done");
+		        	double val= (double) modelAlerte.getValueAt(selectedRow, 2);
+		        	boolean superieur= ((String)modelAlerte.getValueAt(selectedRow, 3)).equals("Superieur");
+		        	dm.removeAlerte(ID, new Alerte(val,superieur));
+		        	modelAlerte.removeRow(selectedRow);
 		        }
 			}	
 		});
 		
 		capteurTree.addTreeSelectionListener(new TreeSelectionListener() {
 			@Override
-			public void valueChanged(TreeSelectionEvent e) {
+			public void valueChanged(TreeSelectionEvent e){
 				TreePath[] selected =capteurTree.getSelectionPaths();
 				if(selected!=null){
+					desinscB.setEnabled(true);
 					List<Capteur> selectedCapteurs=new ArrayList<>();
 					for(TreePath node: selected){
 						List<Capteur>selectedCapteursInNode=ctm.getCapteurs(node);
@@ -310,7 +246,10 @@ public class InterfaceVisu extends JFrame {
 								selectedCapteurs.add(c);
 					}
 					dm.show(selectedCapteurs);
-				}
+					if(selectedCapteurs.size()==0)
+						desinscB.setEnabled(false);
+				}else
+					desinscB.setEnabled(false);
 			}
 		});
 		
@@ -387,6 +326,28 @@ public class InterfaceVisu extends JFrame {
 			}
 		});
 		
+		desinscB.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				TreePath[] selected =capteurTree.getSelectionPaths();
+				if(selected!=null){
+					List<Capteur> selectedCapteurs=new ArrayList<>();
+					for(TreePath node: selected){
+						List<Capteur>selectedCapteursInNode=ctm.getCapteurs(node);
+						for(Capteur c : selectedCapteursInNode)
+							if(!selectedCapteurs.contains(c))
+								selectedCapteurs.add(c);
+					}
+					Capteur[] capteurValide = sIHM.desinscrire(textID.getText(), selectedCapteurs);
+					for(Capteur cap : capteurValide){
+						ctm.remove(cap.getID());
+						dm.remove(cap.getID());
+						InterfaceSansConnexion.finirEnregistrement(cap); //Rajout
+						capteurListModel.addElement(cap);
+					}
+				}
+			}
+		});
+		
 		inscB.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent e){
 				List<Capteur> capteurInscription= list.getSelectedValuesList();
@@ -408,9 +369,8 @@ public class InterfaceVisu extends JFrame {
 			public void windowClosing(WindowEvent e){
 				InterfaceSansConnexion.stopToutEnregistrement(); //Rajout
 				if(sIHM!=null)sIHM.terminate();
-				if(connected){
+				if(connected)
 					sIHM.deconnecterIHM(textID.getText());
-				}
 			}
 		});
 	}
